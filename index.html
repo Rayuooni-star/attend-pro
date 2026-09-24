@@ -1,83 +1,516 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>سجل | نظام حضور الموظفين</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f4f7fb;color:#142033}button,input{font:inherit} .app{min-height:100vh;display:flex;flex-direction:row;background:#f5f8fc}.sidebar{width:270px;background:linear-gradient(180deg,#071a33,#0b2949);color:#fff;padding:24px 18px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;gap:12px;padding:8px 10px 22px}.brand-mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#1d8cff,#54b7ff);display:grid;place-items:center;font-weight:900;font-size:21px;box-shadow:0 10px 25px #0003}.brand b{font-size:21px}.brand span{display:block;font-size:12px;color:#b8c9dc;margin-top:3px}.nav{display:grid;gap:8px}.nav button{border:0;background:transparent;color:#d6e3f1;text-align:right;padding:14px 15px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:12px;font-weight:700}.nav button:hover,.nav button.active{background:#1976e8;color:white}.nav i{font-style:normal;width:24px;text-align:center;font-size:20px}.company{margin-top:auto;border:1px solid #ffffff20;border-radius:16px;padding:16px;background:#ffffff08}.company small{color:#a8bad0}.company strong{display:block;margin-top:6px}.logout{border:1px solid #ffffff20;background:#ffffff08;color:white;border-radius:12px;padding:12px;cursor:pointer}.main{flex:1;min-width:0}.topbar{height:76px;background:#fff;border-bottom:1px solid #e4ebf3;display:flex;align-items:center;justify-content:space-between;padding:0 32px;direction:rtl}.top-left{display:flex;align-items:center;gap:14px}.avatar{width:42px;height:42px;border-radius:50%;background:#dcecff;color:#1268ca;display:grid;place-items:center;font-weight:900}.profile{direction:rtl;text-align:right}.profile b{display:block}.profile small{color:#718198}.search{width:min(420px,45vw);border:1px solid #dfe7f0;border-radius:12px;padding:11px 15px;outline:none;background:#fbfdff;direction:rtl}.content{padding:28px 32px}.hero{min-height:150px;border-radius:22px;padding:28px 32px;color:#fff;background:linear-gradient(90deg,#0b2748dd,#0f5ba9cc),url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80') center/cover;display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 15px 35px #183b6018}.hero h1{margin:0 0 7px;font-size:30px}.hero p{margin:0;color:#dbeaff}.date{text-align:left;direction:rtl}.date b{font-size:16px}.date small{display:block;color:#c7d8ea;margin-top:5px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}.card{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}.metric{display:flex;align-items:center;justify-content:space-between}.metric .icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px}.green{background:#e7f8ef;color:#15955a}.amber{background:#fff5dd;color:#c7860b}.red{background:#ffebee;color:#d83b4b}.blue{background:#e7f1ff;color:#1471db}.metric h2{margin:0;font-size:29px}.metric p{margin:6px 0 0;color:#68788d;font-weight:700}.grid{display:grid;grid-template-columns:1.15fr 1.6fr 1fr;gap:18px;margin-top:18px}.panel{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}.panel h3{margin:0 0 16px;font-size:18px}.map{height:290px;border-radius:14px;background:linear-gradient(135deg,#dfeaf2,#c9d9e5);position:relative;overflow:hidden}.map:before,.map:after{content:'';position:absolute;background:#fff;opacity:.7}.map:before{width:120%;height:3px;top:48%;left:-10%;transform:rotate(-18deg);box-shadow:0 65px 0 #fff,0 -70px 0 #fff}.map:after{height:120%;width:3px;left:45%;top:-10%;transform:rotate(23deg);box-shadow:70px 0 0 #fff,-90px 0 0 #fff}.pin{position:absolute;width:22px;height:22px;border:4px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 10px #0003}.pin b{position:absolute;transform:rotate(45deg);font-size:0}.p1{top:28%;left:25%;background:#16a56b}.p2{top:55%;left:52%;background:#1b7be0}.p3{top:39%;left:72%;background:#ef4c57}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 8px;border-bottom:1px solid #edf1f5;text-align:right;white-space:nowrap}.table th{font-size:12px;color:#75859a;background:#f8fafc}.status{display:inline-block;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:800}.s-present{background:#e5f8ee;color:#118353}.s-late{background:#fff3d8;color:#a66c00}.s-missing{background:#ffe8ec;color:#c83446}.employee{display:flex;align-items:center;gap:9px}.mini-avatar{width:32px;height:32px;border-radius:50%;background:#e8eef7;display:grid;place-items:center;color:#4a6078;font-weight:800}.bar-chart{height:210px;display:flex;align-items:end;gap:14px;padding:15px 5px 0}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}.bars{height:170px;width:100%;display:flex;align-items:end;gap:4px}.bar{flex:1;border-radius:7px 7px 2px 2px;background:#1e78dc}.bar.late{background:#f3ad27}.bar.abs{background:#e9515d}.bar-col small{color:#738299}.donut{width:155px;height:155px;border-radius:50%;background:conic-gradient(#18a868 0 80%,#f2b332 80% 90%,#ea515c 90%);display:grid;place-items:center;margin:15px auto;position:relative}.donut:after{content:'80%';width:112px;height:112px;background:#fff;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900}.legend{display:grid;gap:9px}.legend span{display:flex;align-items:center;gap:8px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}.location-list{display:grid;gap:12px}.loc{display:flex;align-items:center;justify-content:space-between;border:1px solid #edf1f5;padding:12px;border-radius:12px}.loc-left{display:flex;align-items:center;gap:10px}.loc-icon{width:38px;height:38px;border-radius:11px;background:#eaf3ff;color:#1672d5;display:grid;place-items:center}.muted{color:#7a899c;font-size:12px}.footer-note{margin-top:18px;color:#8290a2;font-size:12px;text-align:center}@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.sidebar{width:220px}}@media(max-width:760px){.app{display:block}.sidebar{width:100%;height:auto;position:relative}.nav{grid-template-columns:repeat(3,1fr)}.nav button{justify-content:center}.nav button span{display:none}.content{padding:16px}.topbar{padding:0 16px}.search{display:none}.cards{grid-template-columns:1fr 1fr}.hero{padding:22px}.hero h1{font-size:23px}.date{display:none}}@media(max-width:480px){.cards{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f4f7fb;color:#142033}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex;flex-direction:row;background:#f5f8fc}
+.sidebar{width:270px;background:linear-gradient(180deg,#071a33,#0b2949);color:#fff;padding:24px 18px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:8px 10px 22px}
+.brand-mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#1d8cff,#54b7ff);display:grid;place-items:center;font-weight:900;font-size:21px;box-shadow:0 10px 25px #0003}
+.brand b{font-size:21px}.brand span{display:block;font-size:12px;color:#b8c9dc;margin-top:3px}
+.nav{display:grid;gap:8px}.nav button{border:0;background:transparent;color:#d6e3f1;text-align:right;padding:14px 15px;border-radius:12px;display:flex;align-items:center;gap:12px;font-weight:700}
+.nav button:hover,.nav button.active{background:#1976e8;color:#fff}.nav i{font-style:normal;width:24px;text-align:center;font-size:20px}
+.company{margin-top:auto;border:1px solid #ffffff20;border-radius:16px;padding:16px;background:#ffffff08}.company small{color:#a8bad0}.company strong{display:block;margin-top:6px}
+.logout{border:1px solid #ffffff20;background:#ffffff08;color:#fff;border-radius:12px;padding:12px}
+.main{flex:1;min-width:0}.topbar{height:76px;background:#fff;border-bottom:1px solid #e4ebf3;display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.top-left{display:flex;align-items:center;gap:14px}.avatar{width:42px;height:42px;border-radius:50%;background:#dcecff;color:#1268ca;display:grid;place-items:center;font-weight:900}
+.profile{text-align:right}.profile b{display:block}.profile small{color:#718198}
+.search{width:min(420px,45vw);border:1px solid #dfe7f0;border-radius:12px;padding:11px 15px;outline:none;background:#fbfdff}
+.content{padding:28px 32px}.hero{min-height:150px;border-radius:22px;padding:28px 32px;color:#fff;background:linear-gradient(90deg,#0b2748dd,#0f5ba9cc),url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80') center/cover;display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 15px 35px #183b6018}
+.hero h1{margin:0 0 7px;font-size:30px}.hero p{margin:0;color:#dbeaff}.date{text-align:left}.date b{font-size:16px}.date small{display:block;color:#c7d8ea;margin-top:5px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}.card{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}
+.metric{display:flex;align-items:center;justify-content:space-between}.metric .icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px}.green{background:#e7f8ef;color:#15955a}.amber{background:#fff5dd;color:#c7860b}.red{background:#ffebee;color:#d83b4b}.blue{background:#e7f1ff;color:#1471db}.metric h2{margin:0;font-size:29px}.metric p{margin:6px 0 0;color:#68788d;font-weight:700}
+.grid{display:grid;grid-template-columns:1.15fr 1.6fr 1fr;gap:18px;margin-top:18px}.panel{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}.panel h3{margin:0 0 16px;font-size:18px}
+.map{height:290px;border-radius:14px;background:linear-gradient(135deg,#dfeaf2,#c9d9e5);position:relative;overflow:hidden}.map:before,.map:after{content:'';position:absolute;background:#fff;opacity:.7}.map:before{width:120%;height:3px;top:48%;left:-10%;transform:rotate(-18deg);box-shadow:0 65px 0 #fff,0 -70px 0 #fff}.map:after{height:120%;width:3px;left:45%;top:-10%;transform:rotate(23deg);box-shadow:70px 0 0 #fff,-90px 0 0 #fff}
+.pin{position:absolute;width:22px;height:22px;border:4px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 10px #0003}.p1{top:28%;left:25%;background:#16a56b}.p2{top:55%;left:52%;background:#1b7be0}.p3{top:39%;left:72%;background:#ef4c57}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 8px;border-bottom:1px solid #edf1f5;text-align:right;white-space:nowrap}.table th{font-size:12px;color:#75859a;background:#f8fafc}
+.status{display:inline-block;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:800}.s-present{background:#e5f8ee;color:#118353}.s-late{background:#fff3d8;color:#a66c00}.s-missing{background:#ffe8ec;color:#c83446}
+.employee{display:flex;align-items:center;gap:9px}.mini-avatar{width:32px;height:32px;border-radius:50%;background:#e8eef7;display:grid;place-items:center;color:#4a6078;font-weight:800}
+.bar-chart{height:210px;display:flex;align-items:end;gap:14px;padding:15px 5px 0}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}.bars{height:170px;width:100%;display:flex;align-items:end;gap:4px}.bar{flex:1;border-radius:7px 7px 2px 2px;background:#1e78dc}.bar.late{background:#f3ad27}.bar.abs{background:#e9515d}.bar-col small{color:#738299}
+.donut{width:155px;height:155px;border-radius:50%;background:conic-gradient(#18a868 0 80%,#f2b332 80% 90%,#ea515c 90%);display:grid;place-items:center;margin:15px auto;position:relative}.donut:after{content:'80%';width:112px;height:112px;background:#fff;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900}
+.legend{display:grid;gap:9px}.legend span{display:flex;align-items:center;gap:8px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.location-list{display:grid;gap:12px}.loc{display:flex;align-items:center;justify-content:space-between;border:1px solid #edf1f5;padding:12px;border-radius:12px}.loc-left{display:flex;align-items:center;gap:10px}.loc-icon{width:38px;height:38px;border-radius:11px;background:#eaf3ff;color:#1672d5;display:grid;place-items:center}.muted{color:#7a899c;font-size:12px}
+.footer-note{margin-top:18px;color:#8290a2;font-size:12px;text-align:center}.page-area{margin-top:18px}.page{min-height:520px}.page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}.page-head h2{margin:0;font-size:25px}.page-head p{margin:7px 0 0;color:#718198}.primary-btn{border:0;background:#1976e8;color:#fff;padding:11px 18px;border-radius:11px;font-weight:800}.primary-btn:hover{background:#1267cf}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field{display:grid;gap:7px}.field label{font-size:13px;font-weight:800;color:#52647a}.field input,.field select{border:1px solid #dfe7f0;border-radius:11px;padding:11px 13px;background:#fbfdff;outline:none}.field input:focus,.field select:focus{border-color:#1976e8}
+.modal-backdrop{position:fixed;inset:0;background:#071a3388;display:none;align-items:center;justify-content:center;z-index:50;padding:20px}.modal{width:min(520px,100%);background:#fff;border-radius:20px;padding:24px;box-shadow:0 25px 80px #0004}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h3{margin:0}.close{border:0;background:#eef3f8;border-radius:10px;width:38px;height:38px}
+.toast{position:fixed;bottom:25px;left:25px;background:#09213d;color:#fff;padding:13px 17px;border-radius:12px;box-shadow:0 10px 30px #0003;display:none;z-index:100}
+.login-screen{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:200;
+  padding:28px;overflow:hidden;
+  background:
+    radial-gradient(circle at 78% 18%,#2d9cff55 0 90px,transparent 91px),
+    radial-gradient(circle at 12% 80%,#35c6e833 0 140px,transparent 141px),
+    linear-gradient(135deg,#06172d 0%,#0a2b50 48%,#0f5fa9 100%);
+}
+.login-screen:before{
+  content:"";position:absolute;inset:0;opacity:.18;
+  background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
+  background-size:52px 52px;transform:perspective(700px) rotateX(58deg) scale(1.4);transform-origin:center bottom;
+}
+.login-orbit{position:absolute;width:520px;height:520px;border:1px solid #ffffff20;border-radius:50%;left:-180px;bottom:-260px;box-shadow:0 0 0 45px #ffffff06,0 0 0 90px #ffffff04}
+.login-buildings{position:absolute;left:0;right:0;bottom:0;height:230px;opacity:.55}
+.login-buildings i{position:absolute;bottom:0;background:linear-gradient(180deg,#113d64,#071a33);border:1px solid #ffffff12;border-bottom:0;border-radius:5px 5px 0 0;box-shadow:0 -10px 35px #0002}
+.login-buildings i:after{content:"";position:absolute;inset:15px 8px;background:repeating-linear-gradient(90deg,#62c8ff55 0 7px,transparent 7px 14px),repeating-linear-gradient(0deg,#62c8ff33 0 6px,transparent 6px 14px)}
+.login-buildings i:nth-child(1){width:90px;height:120px;left:7%}.login-buildings i:nth-child(2){width:130px;height:190px;left:17%}.login-buildings i:nth-child(3){width:75px;height:145px;left:34%}.login-buildings i:nth-child(4){width:115px;height:170px;right:18%}.login-buildings i:nth-child(5){width:70px;height:105px;right:8%}
+.login-shell{
+  width:min(1060px,100%);min-height:610px;position:relative;z-index:2;
+  display:grid;grid-template-columns:1.05fr .95fr;direction:ltr;
+  border:1px solid #ffffff2e;border-radius:32px;overflow:hidden;
+  background:#ffffff0d;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  box-shadow:0 35px 100px #0006;
+}
+.login-showcase{direction:rtl;color:#fff;padding:54px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.login-showcase:after{content:"";position:absolute;width:360px;height:360px;border:1px solid #ffffff20;border-radius:50%;left:-120px;top:-120px;box-shadow:0 0 0 35px #ffffff06,0 0 0 70px #ffffff04}
+.login-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:2}
+.login-brand-mark{width:54px;height:54px;border-radius:17px;background:linear-gradient(135deg,#38b5ff,#1773e8);display:grid;place-items:center;font-size:25px;font-weight:900;box-shadow:0 12px 30px #0003}
+.login-brand b{font-size:22px}.login-brand small{display:block;color:#b8d5ed;margin-top:3px}
+.login-showcase h2{font-size:42px;line-height:1.2;margin:45px 0 12px;position:relative;z-index:2}
+.login-showcase p{font-size:16px;line-height:1.9;color:#c8dced;max-width:470px;position:relative;z-index:2}
+.login-features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative;z-index:2;margin-top:28px}
+.login-feature{border:1px solid #ffffff18;background:#ffffff0b;border-radius:15px;padding:13px}
+.login-feature b{display:block;font-size:15px}.login-feature span{font-size:11px;color:#a9c3d9}
+.login-card{
+  direction:rtl;width:100%;background:#fff;padding:48px 46px;display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+}
+.login-card:before{content:"";position:absolute;right:0;top:0;width:100%;height:5px;background:linear-gradient(90deg,#1673e8,#39c1e9)}
+.login-card h1{font-size:34px;margin:0 0 8px;color:#0b2340;letter-spacing:-.5px}
+.login-card p{color:#718198;margin:0 0 28px}
+.login-form-title{font-size:12px;color:#8b9aad;font-weight:800;margin-bottom:14px}
+.login-card .field{margin-bottom:14px}
+.login-card .field label{font-size:12px;margin-bottom:7px}
+.login-card .field input{height:50px;border-radius:13px;border:1px solid #dce6ef;background:#f9fbfd;padding:0 15px;transition:.2s}
+.login-card .field input:focus{background:#fff;border-color:#2c8bef;box-shadow:0 0 0 4px #2c8bef14}
+.login-card #loginBtn{height:52px;border-radius:13px;font-size:15px;box-shadow:0 10px 24px #1976e833}
+.login-security{display:flex;align-items:center;justify-content:center;gap:7px;color:#8b99a9;font-size:11px;margin-top:18px}
+.login-security span{width:7px;height:7px;border-radius:50%;background:#19a86a;box-shadow:0 0 0 4px #19a86a15}
+.login-error{background:#ffe8ec;color:#b72e40;padding:10px 12px;border-radius:10px;margin-top:12px;display:none;font-size:13px}
+@media(max-width:800px){
+  .login-shell{grid-template-columns:1fr;min-height:auto;max-width:470px}
+  .login-showcase{display:none}.login-card{padding:42px 30px;min-height:560px}
+}
+@media(max-width:480px){
+  .login-screen{padding:12px}.login-card{padding:34px 22px;border-radius:24px}.login-card h1{font-size:29px}
+}
+.loading{opacity:.65;pointer-events:none}
 
-.page-area{margin-top:18px}.page{min-height:520px}.page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}.page-head h2{margin:0;font-size:25px}.page-head p{margin:7px 0 0;color:#718198}.primary-btn{border:0;background:#1976e8;color:#fff;padding:11px 18px;border-radius:11px;font-weight:800;cursor:pointer}.primary-btn:hover{background:#1267cf}.page .cards{margin-top:0;margin-bottom:18px}.page .grid{margin-top:0}.nav button{transition:.18s}.nav button.active{box-shadow:0 8px 20px #1976e844}
+/* ===== Premium corporate visual layer ===== */
+:root{
+  --navy:#071a33;--blue:#1976e8;--cyan:#39b7e9;--ink:#142033;
+  --line:#e5ebf2;--soft:#f7faff;
+}
+body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7fb}
+.sidebar{box-shadow:10px 0 35px #06203a18}
+.brand-mark{position:relative;overflow:hidden}
+.brand-mark:after{content:"";position:absolute;width:70px;height:18px;background:#fff4;transform:rotate(-35deg);top:-12px;left:-25px}
+.topbar{box-shadow:0 5px 24px #163a5b0a}
+.content{max-width:1700px;margin:auto}
+.hero{position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:280px;height:280px;border:1px solid #ffffff25;border-radius:50%;left:-70px;top:-95px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff05}
+.hero>div{position:relative;z-index:2}
+.card{position:relative;overflow:hidden;transition:.2s transform,.2s box-shadow}
+.card:hover{transform:translateY(-3px);box-shadow:0 15px 35px #193d6818}
+.card:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#1976e808;left:-35px;bottom:-45px}
+.panel{position:relative;overflow:hidden}
+.panel:before{content:"";position:absolute;top:0;right:0;width:90px;height:3px;background:linear-gradient(90deg,#1976e8,#42c5ee);border-radius:0 0 0 8px}
+.page .panel{overflow:hidden}
+
+/* city / location map */
+.city-map{background:
+  radial-gradient(circle at 20% 30%,#ffffffbb 0 2px,transparent 3px),
+  linear-gradient(145deg,#e9f2f7,#d7e6ee);
+}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(#fff8 1px,transparent 1px),linear-gradient(90deg,#fff8 1px,transparent 1px);background-size:42px 42px;opacity:.5}
+.road{position:absolute;background:#fff;box-shadow:0 0 0 2px #d7e3ea}
+.r1{width:120%;height:17px;top:43%;right:-8%;transform:rotate(-14deg)}
+.r2{width:110%;height:13px;top:72%;right:-5%;transform:rotate(18deg)}
+.r3{width:14px;height:125%;top:-12%;right:33%;transform:rotate(27deg)}
+.building{position:absolute;background:linear-gradient(145deg,#9bb1bf,#708a9b);border-radius:4px 4px 2px 2px;box-shadow:7px 9px 0 #7891a055;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:7px}
+.building i{display:block;background:#dff5ff;border-radius:2px;height:7px;opacity:.9}
+.b1{width:62px;height:48px;right:15%;top:17%}.b2{width:55px;height:42px;right:43%;top:24%}
+.b3{width:72px;height:58px;left:13%;top:58%}.b4{width:48px;height:39px;left:42%;top:68%}
+.map-label{position:absolute;background:#ffffffdd;border:1px solid #ffffff;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#50667a;box-shadow:0 4px 12px #173b5515}
+.l1{right:8%;top:10%}.l2{left:7%;top:51%}
+.map-pin{position:absolute;width:34px;height:34px;border-radius:50% 50% 50% 5px;transform:rotate(-45deg);display:grid;place-items:center;color:#fff;box-shadow:0 7px 16px #143b5b44;border:3px solid #fff;z-index:4}
+.map-pin span{transform:rotate(45deg);font-size:17px;font-weight:900}
+.mp1{right:28%;top:36%;background:#168a62}.mp2{right:58%;top:52%;background:#1976e8}.mp3{left:21%;top:34%;background:#ef4c57}
+.map-status{position:absolute;left:12px;bottom:12px;background:#ffffffeb;border:1px solid #e4edf3;border-radius:10px;padding:7px 10px;font-size:11px;font-weight:800;color:#526a7c;box-shadow:0 5px 16px #173b5515;z-index:5}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#18a868;box-shadow:0 0 0 4px #18a86822;margin-left:4px}
+.location-list .loc{transition:.18s;background:#fff}
+.location-list .loc:hover{transform:translateX(-3px);border-color:#cfe1f4;box-shadow:0 7px 18px #183b6010}
+.loc-icon{box-shadow:inset 0 0 0 1px #dceafa}
+.avatar{box-shadow:0 6px 16px #1268ca20}
+.status{letter-spacing:.1px}
+
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.sidebar{width:220px}}
+@media(max-width:760px){.app{display:block}.sidebar{width:100%;height:auto;position:relative}.nav{grid-template-columns:repeat(3,1fr)}.nav button{justify-content:center}.nav button span{display:none}.content{padding:16px}.topbar{padding:0 16px}.search{display:none}.cards{grid-template-columns:1fr 1fr}.hero{padding:22px}.hero h1{font-size:23px}.date{display:none}.form-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.cards{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<div class="app">
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-orbit"></div>
+  <div class="login-buildings"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="login-shell">
+    <section class="login-showcase">
+      <div class="login-brand">
+        <div class="login-brand-mark">س</div>
+        <div><b>سجل</b><small>Employee Attendance Platform</small></div>
+      </div>
+      <div>
+        <h2>كل حضور.<br>في مكان واحد.</h2>
+        <p>منصة تشغيلية لمتابعة حضور الموظفين ومواقعهم لحظة بلحظة، بتصميم مؤسسي واضح ومعلومات منظمة.</p>
+        <div class="login-features">
+          <div class="login-feature"><b>📍 المواقع</b><span>تسجيل المواقع</span></div>
+          <div class="login-feature"><b>◷ الحضور</b><span>متابعة يومية</span></div>
+          <div class="login-feature"><b>▥ التقارير</b><span>بيانات منظمة</span></div>
+        </div>
+      </div>
+      <small style="color:#86a8c4;position:relative;z-index:2">نظام إدارة الحضور • الإصدار التشغيلي 0.1</small>
+    </section>
+    <section class="login-card">
+      <div class="login-form-title">لوحة الإدارة</div>
+      <h1>تسجيل الدخول</h1>
+      <p>أدخل بيانات حسابك للوصول إلى النظام</p>
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button id="loginBtn" class="primary-btn" style="width:100%;margin-top:8px">دخول إلى النظام&nbsp; ←</button>
+      <div id="loginError" class="login-error"></div>
+      <div class="login-security"><span></span> اتصال آمن • تتم المصادقة عبر Supabase</div>
+    </section>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
 <aside class="sidebar">
   <div class="brand"><div class="brand-mark">س</div><div><b>سجل</b><span>نظام حضور الموظفين</span></div></div>
   <nav class="nav">
-    <button class="active"><i>⌂</i><span>الرئيسية</span></button>
-    <button><i>▣</i><span>التحضير اليومي</span></button>
-    <button><i>♙</i><span>الموظفين</span></button>
-    <button><i>⌖</i><span>المواقع</span></button>
-    <button><i>▥</i><span>التقارير</span></button>
-    <button><i>✉</i><span>الرسائل الواردة</span></button>
-    <button><i>⚙</i><span>الإعدادات</span></button>
+    <button class="active" data-page="dashboard"><i>⌂</i><span>الرئيسية</span></button>
+    <button data-page="attendance"><i>▣</i><span>التحضير اليومي</span></button>
+    <button data-page="employees"><i>♙</i><span>الموظفين</span></button>
+    <button data-page="locations"><i>⌖</i><span>المواقع</span></button>
+    <button data-page="reports"><i>▥</i><span>التقارير</span></button>
+    <button data-page="messages"><i>✉</i><span>الرسائل الواردة</span></button>
+    <button data-page="settings"><i>⚙</i><span>الإعدادات</span></button>
   </nav>
-  <div class="company"><small>النظام التشغيلي</small><strong>شركة مطلق السلمي</strong><small>الإصدار التجريبي 0.1</small></div>
-  <button class="logout">↪ تسجيل الخروج</button>
+  <div class="company"><small>النظام التشغيلي</small><strong>شركة مطلق السلمي</strong><small>متصل بقاعدة البيانات</small></div>
+  <button id="logoutBtn" class="logout">↪ تسجيل الخروج</button>
 </aside>
+
 <main class="main">
-  <header class="topbar">
-    <div class="top-left"><div class="profile"><b>أ. مطلق السلمي</b><small>المدير العام</small></div><div class="avatar">MA</div></div>
-    <div class="top-left"><button style="border:0;background:none;font-size:22px">🔔</button><input class="search" placeholder="البحث عن موظف ..."/></div>
-  </header>
-  <section class="content">
+<header class="topbar">
+  <div class="top-left"><div class="profile"><b>أ. مطلق السلمي</b><small id="userEmail">المدير العام</small></div><div class="avatar">MA</div></div>
+  <div class="top-left"><button id="refreshBtn" style="border:0;background:none;font-size:22px" title="تحديث">↻</button><button style="border:0;background:none;font-size:22px">🔔</button><input id="searchInput" class="search" placeholder="البحث عن موظف ..."></div>
+</header>
+
+<section class="content">
+  <div id="dashboardView">
     <div class="hero">
       <div><h1>مرحبًا أ. مطلق السلمي</h1><p>نظرة عامة سريعة على حضور الموظفين اليوم</p></div>
-      <div class="date"><b>الخميس، 24 سبتمبر 2026</b><small>3 ربيع الآخر 1448 هـ</small></div>
+      <div class="date"><b id="todayDate">—</b><small>التاريخ الهجري: 3 ربيع الآخر 1448 هـ</small></div>
     </div>
+
     <div class="cards">
-      <div class="card"><div class="metric"><div><h2>40</h2><p>إجمالي الموظفين</p></div><div class="icon blue">👥</div></div></div>
-      <div class="card"><div class="metric"><div><h2>32</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div>
-      <div class="card"><div class="metric"><div><h2>4</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div>
-      <div class="card"><div class="metric"><div><h2>4</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div>
+      <div class="card"><div class="metric"><div><h2 id="totalEmployees">0</h2><p>إجمالي الموظفين</p></div><div class="icon blue">👥</div></div></div>
+      <div class="card"><div class="metric"><div><h2 id="presentCount">0</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div>
+      <div class="card"><div class="metric"><div><h2 id="lateCount">0</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div>
+      <div class="card"><div class="metric"><div><h2 id="missingCount">0</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div>
     </div>
+
     <div class="grid">
-      <section class="panel"><h3>المواقع المرسلة اليوم</h3><div class="map"><div class="pin p1"></div><div class="pin p2"></div><div class="pin p3"></div></div></section>
-      <section class="panel"><h3>التحضير اليومي</h3><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>وقت الإرسال</th><th>الموقع</th><th>الحالة</th></tr></thead><tbody>
-        <tr><td><div class="employee"><div class="mini-avatar">أ</div>أحمد الحربي</div></td><td>7:52 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr>
-        <tr><td><div class="employee"><div class="mini-avatar">م</div>محمد السلمي</div></td><td>7:58 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr>
-        <tr><td><div class="employee"><div class="mini-avatar">خ</div>خالد القحطاني</div></td><td>8:14 ص</td><td>📍 عرض الموقع</td><td><span class="status s-late">متأخر</span></td></tr>
-        <tr><td><div class="employee"><div class="mini-avatar">ع</div>عبدالله الغامدي</div></td><td>8:21 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr>
-        <tr><td><div class="employee"><div class="mini-avatar">س</div>سعد الزهراني</div></td><td>8:27 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr>
-      </tbody></table></div></section>
-      <section class="panel"><h3>نسبة الحضور اليوم</h3><div class="donut"></div><div class="legend"><span><i class="dot" style="background:#18a868"></i> حاضر — 32</span><span><i class="dot" style="background:#f2b332"></i> متأخر — 4</span><span><i class="dot" style="background:#ea515c"></i> لم يسجل — 4</span></div></section>
+      <section class="panel"><h3>المواقع المرسلة اليوم</h3><div class="map city-map" id="dashboardMap">
+  <div class="map-grid"></div>
+  <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div>
+  <div class="building b1"><i></i><i></i><i></i><i></i></div>
+  <div class="building b2"><i></i><i></i><i></i></div>
+  <div class="building b3"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="building b4"><i></i><i></i><i></i></div>
+  <div class="map-label l1">مقر الإدارة</div>
+  <div class="map-label l2">موقع ميداني</div>
+  <div class="map-pin mp1"><span>⌖</span></div>
+  <div class="map-pin mp2"><span>⌖</span></div>
+  <div class="map-pin mp3"><span>⌖</span></div>
+  <div class="map-status"><span class="live-dot"></span> 8 مواقع اليوم</div>
+</div></section>
+      <section class="panel"><h3>التحضير اليومي</h3><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>وقت الإرسال</th><th>الموقع</th><th>الحالة</th></tr></thead><tbody id="dashboardAttendanceBody"></tbody></table></div></section>
+      <section class="panel"><h3>نسبة الحضور اليوم</h3><div class="donut" id="attendanceDonut"></div><div class="legend"><span><i class="dot" style="background:#18a868"></i> حاضر — <b id="legendPresent">0</b></span><span><i class="dot" style="background:#f2b332"></i> متأخر — <b id="legendLate">0</b></span><span><i class="dot" style="background:#ea515c"></i> لم يسجل — <b id="legendMissing">0</b></span></div></section>
     </div>
+
     <div class="grid">
-      <section class="panel"><h3>معدل الحضور هذا الأسبوع</h3><div class="bar-chart">
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:55%"></i><i class="bar late" style="height:10%"></i></div><small>السبت</small></div>
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:64%"></i><i class="bar late" style="height:12%"></i></div><small>الأحد</small></div>
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:75%"></i><i class="bar late" style="height:9%"></i></div><small>الإثنين</small></div>
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:82%"></i><i class="bar late" style="height:8%"></i></div><small>الثلاثاء</small></div>
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:91%"></i><i class="bar late" style="height:8%"></i></div><small>الأربعاء</small></div>
-        <div class="bar-col"><div class="bars"><i class="bar" style="height:72%"></i><i class="bar abs" style="height:15%"></i></div><small>الخميس</small></div>
-      </div></section>
-      <section class="panel"><h3>أحدث المواقع المرسلة</h3><div class="location-list">
-        <div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>أحمد الحربي</b><div class="muted">اليوم — 7:52 ص</div></div></div><span>›</span></div>
-        <div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>محمد السلمي</b><div class="muted">اليوم — 7:58 ص</div></div></div><span>›</span></div>
-        <div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>خالد القحطاني</b><div class="muted">اليوم — 8:14 ص</div></div></div><span>›</span></div>
-      </div></section>
+      <section class="panel"><h3>معدل الحضور هذا الأسبوع</h3><div class="bar-chart" id="weekChart"></div></section>
+      <section class="panel"><h3>أحدث المواقع المرسلة</h3><div class="location-list" id="latestLocations"></div></section>
     </div>
-    <div id="pageArea" class="page-area" style="display:none">
-      <section id="page-attendance" class="page panel"><div class="page-head"><div><h2>التحضير اليومي</h2><p>متابعة حضور الموظفين وتسجيلات المواقع لهذا اليوم.</p></div><button class="primary-btn">تحديث التحضير</button></div><div class="cards"><div class="card"><div class="metric"><div><h2>32</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div><div class="card"><div class="metric"><div><h2>4</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div><div class="card"><div class="metric"><div><h2>4</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div></div><div class="panel"><h3>سجل التحضير</h3><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>وقت الإرسال</th><th>الموقع</th><th>الحالة</th></tr></thead><tbody><tr><td>أحمد الحربي</td><td>1001</td><td>7:52 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr><tr><td>محمد السلمي</td><td>1002</td><td>7:58 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr><tr><td>خالد القحطاني</td><td>1003</td><td>8:14 ص</td><td>📍 عرض الموقع</td><td><span class="status s-late">متأخر</span></td></tr><tr><td>عبدالله الغامدي</td><td>1004</td><td>8:21 ص</td><td>📍 عرض الموقع</td><td><span class="status s-present">حاضر</span></td></tr></tbody></table></div></div></section>
-      <section id="page-employees" class="page panel"><div class="page-head"><div><h2>الموظفين</h2><p>إدارة بيانات الموظفين وأرقام الجوال المرتبطة بالحضور.</p></div><button class="primary-btn">+ إضافة موظف</button></div><div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>رقم الجوال</th><th>القسم</th><th>الحالة</th></tr></thead><tbody><tr><td>أحمد الحربي</td><td>1001</td><td>05xxxxxxxx</td><td>الميدان</td><td><span class="status s-present">نشط</span></td></tr><tr><td>محمد السلمي</td><td>1002</td><td>05xxxxxxxx</td><td>التشغيل</td><td><span class="status s-present">نشط</span></td></tr><tr><td>خالد القحطاني</td><td>1003</td><td>05xxxxxxxx</td><td>الميدان</td><td><span class="status s-present">نشط</span></td></tr><tr><td>عبدالله الغامدي</td><td>1004</td><td>05xxxxxxxx</td><td>الإدارة</td><td><span class="status s-present">نشط</span></td></tr></tbody></table></div></div></section>
-      <section id="page-locations" class="page panel"><div class="page-head"><div><h2>المواقع</h2><p>آخر مواقع الحضور التي أرسلها الموظفون عبر النظام.</p></div><button class="primary-btn">تحديث المواقع</button></div><div class="grid"><section class="panel"><h3>خريطة المواقع</h3><div class="map"><div class="pin p1"></div><div class="pin p2"></div><div class="pin p3"></div></div></section><section class="panel"><h3>آخر التسجيلات</h3><div class="location-list"><div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>أحمد الحربي</b><div class="muted">7:52 ص — تم تسجيل الموقع</div></div></div><span>›</span></div><div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>محمد السلمي</b><div class="muted">7:58 ص — تم تسجيل الموقع</div></div></div><span>›</span></div><div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>خالد القحطاني</b><div class="muted">8:14 ص — تم تسجيل الموقع</div></div></div><span>›</span></div></div></section></div></section>
-      <section id="page-reports" class="page panel"><div class="page-head"><div><h2>التقارير</h2><p>تقارير الحضور اليومية والأسبوعية والشهرية.</p></div><button class="primary-btn">تصدير التقرير</button></div><div class="grid"><section class="panel"><h3>معدل الحضور هذا الأسبوع</h3><div class="bar-chart"><div class="bar-col"><div class="bars"><i class="bar" style="height:55%"></i><i class="bar late" style="height:10%"></i></div><small>السبت</small></div><div class="bar-col"><div class="bars"><i class="bar" style="height:64%"></i><i class="bar late" style="height:12%"></i></div><small>الأحد</small></div><div class="bar-col"><div class="bars"><i class="bar" style="height:75%"></i><i class="bar late" style="height:9%"></i></div><small>الإثنين</small></div><div class="bar-col"><div class="bars"><i class="bar" style="height:82%"></i><i class="bar late" style="height:8%"></i></div><small>الثلاثاء</small></div><div class="bar-col"><div class="bars"><i class="bar" style="height:91%"></i><i class="bar late" style="height:8%"></i></div><small>الأربعاء</small></div><div class="bar-col"><div class="bars"><i class="bar" style="height:72%"></i><i class="bar abs" style="height:15%"></i></div><small>الخميس</small></div></div></section><section class="panel"><h3>ملخص اليوم</h3><div class="donut"></div><div class="legend"><span><i class="dot" style="background:#18a868"></i> حاضر — 32</span><span><i class="dot" style="background:#f2b332"></i> متأخر — 4</span><span><i class="dot" style="background:#ea515c"></i> لم يسجل — 4</span></div></section></div></section>
-      <section id="page-messages" class="page panel"><div class="page-head"><div><h2>الرسائل الواردة</h2><p>المكان المخصص لاحقًا لرسائل واتساب وتسجيلات المواقع.</p></div></div><div class="panel"><div class="loc"><div class="loc-left"><div class="loc-icon">✉</div><div><b>رسالة تجريبية</b><div class="muted">سيتم ربطها بواتساب بعد تجهيز الـ API.</div></div></div><span class="status s-present">جاهز</span></div></div></section>
-      <section id="page-settings" class="page panel"><div class="page-head"><div><h2>الإعدادات</h2><p>إعدادات النظام والصلاحيات وربط الخدمات.</p></div></div><div class="panel"><h3>الإعدادات الأساسية</h3><div class="loc"><div><b>نظام تسجيل الحضور</b><div class="muted">التسجيل عند وصول Location من الموظف.</div></div><span class="status s-present">مفعل</span></div></div></section>
-    </div>
-    <div class="footer-note">واجهة تجريبية — البيانات المعروضة للتصميم فقط، وسيتم ربطها بقاعدة البيانات وواتساب في المراحل التالية.</div>
-  </section>
+  </div>
+
+  <div id="pageArea" class="page-area" style="display:none">
+    <section id="page-attendance" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>التحضير اليومي</h2><p>متابعة حضور الموظفين وتسجيلات المواقع لهذا اليوم.</p></div><button class="primary-btn" onclick="loadAllData()">تحديث التحضير</button></div>
+      <div class="cards"><div class="card"><div class="metric"><div><h2 id="pagePresent">0</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div><div class="card"><div class="metric"><div><h2 id="pageLate">0</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div><div class="card"><div class="metric"><div><h2 id="pageMissing">0</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div></div>
+      <div class="panel"><h3>سجل التحضير</h3><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>وقت الإرسال</th><th>المصدر</th><th>الحالة</th></tr></thead><tbody id="attendanceBody"></tbody></table></div></div>
+    </section>
+
+    <section id="page-employees" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>الموظفين</h2><p>إدارة بيانات الموظفين وأرقام الجوال المرتبطة بالحضور.</p></div><button id="addEmployeeBtn" class="primary-btn">+ إضافة موظف</button></div>
+      <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>رقم الجوال</th><th>القسم</th><th>الحالة</th></tr></thead><tbody id="employeesBody"></tbody></table></div></div>
+    </section>
+
+    <section id="page-locations" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>المواقع</h2><p>آخر مواقع الحضور التي أرسلها الموظفون عبر النظام.</p></div><button class="primary-btn" onclick="loadAllData()">تحديث المواقع</button></div>
+      <div class="grid"><section class="panel"><h3>خريطة المواقع</h3><div class="map city-map" id="locationsMap">
+  <div class="map-grid"></div>
+  <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div>
+  <div class="building b1"><i></i><i></i><i></i><i></i></div>
+  <div class="building b2"><i></i><i></i><i></i></div>
+  <div class="building b3"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="building b4"><i></i><i></i><i></i></div>
+  <div class="map-label l1">مقر الإدارة</div>
+  <div class="map-label l2">موقع ميداني</div>
+  <div class="map-pin mp1"><span>⌖</span></div>
+  <div class="map-pin mp2"><span>⌖</span></div>
+  <div class="map-pin mp3"><span>⌖</span></div>
+  <div class="map-status"><span class="live-dot"></span> مواقع الموظفين</div>
+</div></section><section class="panel"><h3>آخر التسجيلات</h3><div class="location-list" id="locationsList"></div></section></div>
+    </section>
+
+    <section id="page-reports" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>التقارير</h2><p>ملخص الحضور والغياب والتأخر.</p></div><button class="primary-btn" onclick="exportAttendanceCsv()">تصدير CSV</button></div>
+      <div class="grid"><section class="panel"><h3>معدل الحضور هذا الأسبوع</h3><div class="bar-chart" id="reportChart"></div></section><section class="panel"><h3>ملخص اليوم</h3><div class="donut" id="reportDonut"></div><div class="legend"><span>حاضر — <b id="reportPresent">0</b></span><span>متأخر — <b id="reportLate">0</b></span><span>لم يسجل — <b id="reportMissing">0</b></span></div></section></div>
+    </section>
+
+    <section id="page-messages" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>الرسائل الواردة</h2><p>سيتم ربط رسائل واتساب الرسمية وتسجيلات المواقع هنا.</p></div></div>
+      <div class="panel"><div class="loc"><div class="loc-left"><div class="loc-icon">✉</div><div><b>تكامل واتساب</b><div class="muted">واجهة النظام جاهزة لاستقبال البيانات بعد إعداد WhatsApp Business Cloud API.</div></div></div><span class="status s-present">قاعدة البيانات جاهزة</span></div></div>
+    </section>
+
+    <section id="page-settings" class="page panel" style="display:none">
+      <div class="page-head"><div><h2>الإعدادات</h2><p>إعدادات النظام والخدمات.</p></div></div>
+      <div class="panel"><h3>حالة الخدمات</h3><div class="location-list"><div class="loc"><div><b>Supabase</b><div class="muted">قاعدة البيانات والمصادقة</div></div><span class="status s-present">متصل</span></div><div class="loc"><div><b>WhatsApp</b><div class="muted">سيتم تفعيله في المرحلة التالية</div></div><span class="status s-late">قيد التجهيز</span></div></div></div>
+    </section>
+  </div>
+  <div class="footer-note">نظام سجل — البيانات الآن تُقرأ من قاعدة Supabase بعد تسجيل الدخول.</div>
+</section>
 </main>
 </div>
-<script>const navButtons=[...document.querySelectorAll('.nav button')];const pageMap=['dashboard','attendance','employees','locations','reports','messages','settings'];const dashboardContent=[...document.querySelectorAll('.content > *')].filter(el=>!el.classList.contains('page-area')&&!el.classList.contains('footer-note'));const pageArea=document.getElementById('pageArea');function showPage(key){dashboardContent.forEach(el=>el.style.display=key==='dashboard'?'':'none');document.querySelector('.footer-note').style.display=key==='dashboard'?'':'none';pageArea.style.display=key==='dashboard'?'none':'block';document.querySelectorAll('.page').forEach(p=>p.style.display='none');if(key!=='dashboard'){const page=document.getElementById('page-'+key);if(page)page.style.display='block';}navButtons.forEach((btn,i)=>btn.classList.toggle('active',pageMap[i]===key));window.scrollTo({top:0,behavior:'smooth'});}navButtons.forEach((btn,i)=>btn.addEventListener('click',()=>showPage(pageMap[i])));showPage('dashboard');</script></body></html>
+
+<div id="employeeModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head"><h3>إضافة موظف</h3><button class="close" onclick="closeEmployeeModal()">×</button></div>
+    <div class="form-grid">
+      <div class="field"><label>الرقم الوظيفي</label><input id="empNumber" placeholder="1001"></div>
+      <div class="field"><label>اسم الموظف</label><input id="empName" placeholder="أحمد الحربي"></div>
+      <div class="field"><label>رقم الجوال</label><input id="empPhone" placeholder="9665xxxxxxxx"></div>
+      <div class="field"><label>المسمى الوظيفي</label><input id="empJob" placeholder="موظف ميداني"></div>
+      <div class="field"><label>القسم</label><select id="empDept"></select></div>
+    </div>
+    <button id="saveEmployeeBtn" class="primary-btn" style="width:100%;margin-top:18px">حفظ الموظف</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://lzpkjoojyfhejvgolxua.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_VfzEl47D4k3bbsVXqcQJDg_W1V9A6po';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+let employees = [];
+let attendance = [];
+let locations = [];
+let departments = [];
+
+const navButtons = [...document.querySelectorAll('.nav button')];
+const pageMap = navButtons.map(b => b.dataset.page);
+
+function todayISO(){
+  const d = new Date();
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function fmtTime(value){
+  if(!value) return '—';
+  return new Date(value).toLocaleTimeString('ar-SA',{hour:'numeric',minute:'2-digit'});
+}
+function showToast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block';
+  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',3000);
+}
+function escapeHtml(v){
+  return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function showPage(key){
+  document.getElementById('dashboardView').style.display=key==='dashboard'?'block':'none';
+  document.getElementById('pageArea').style.display=key==='dashboard'?'none':'block';
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  if(key!=='dashboard'){
+    const p=document.getElementById('page-'+key); if(p)p.style.display='block';
+  }
+  navButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.page===key));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+navButtons.forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.page)));
+
+async function loadAllData(){
+  try{
+    document.body.classList.add('loading');
+    const [e,a,l,d] = await Promise.all([
+      db.from('employees').select('id,employee_number,full_name,phone_number,job_title,is_active,department_id,departments(name)').order('full_name'),
+      db.from('attendance').select('id,employee_id,attendance_date,check_in_time,status,source,employees(full_name,employee_number)').eq('attendance_date',todayISO()).order('check_in_time',{ascending:false}),
+      db.from('locations').select('id,employee_id,latitude,longitude,sent_at,source,employees(full_name)').order('sent_at',{ascending:false}).limit(30),
+      db.from('departments').select('id,name').order('name')
+    ]);
+    for(const r of [e,a,l,d]) if(r.error) throw r.error;
+    employees=e.data||[]; attendance=a.data||[]; locations=l.data||[]; departments=d.data||[];
+    renderAll();
+  }catch(err){
+    console.error(err);
+    showToast('تعذر تحميل البيانات: '+(err.message||'تحقق من اتصال Supabase'));
+  }finally{document.body.classList.remove('loading')}
+}
+
+function renderAll(){
+  const total=employees.length;
+  const present=attendance.filter(x=>x.status==='present').length;
+  const late=attendance.filter(x=>x.status==='late').length;
+  const missing=Math.max(0,total-present-late);
+
+  document.getElementById('totalEmployees').textContent=total;
+  document.getElementById('presentCount').textContent=present;
+  document.getElementById('lateCount').textContent=late;
+  document.getElementById('missingCount').textContent=missing;
+  ['pagePresent','legendPresent','reportPresent'].forEach(id=>document.getElementById(id).textContent=present);
+  ['pageLate','legendLate','reportLate'].forEach(id=>document.getElementById(id).textContent=late);
+  ['pageMissing','legendMissing','reportMissing'].forEach(id=>document.getElementById(id).textContent=missing);
+
+  const pct=total?Math.round((present+late)/total*100):0;
+  document.getElementById('attendanceDonut').style.background=`conic-gradient(#18a868 0 ${total?present/total*100:0}%,#f2b332 ${total?present/total*100:0}% ${total?(present+late)/total*100:0}%,#ea515c ${total?(present+late)/total*100:0}% 100%)`;
+  document.getElementById('attendanceDonut').style.setProperty('--pct',pct+'%');
+  document.getElementById('reportDonut').style.background=document.getElementById('attendanceDonut').style.background;
+
+  renderAttendance('dashboardAttendanceBody',attendance.slice(0,8),false);
+  renderAttendance('attendanceBody',attendance,true);
+  renderEmployees();
+  renderLocations();
+  renderChart('weekChart');
+  renderChart('reportChart');
+}
+function renderAttendance(id, rows, detailed){
+  const body=document.getElementById(id);
+  if(!rows.length){body.innerHTML=`<tr><td colspan="${detailed?5:4}" style="text-align:center;color:#8290a2;padding:25px">لا توجد تسجيلات اليوم</td></tr>`;return}
+  body.innerHTML=rows.map(r=>{
+    const name=r.employees?.full_name||'موظف غير معروف';
+    const num=r.employees?.employee_number||'—';
+    const status=r.status==='late'?'<span class="status s-late">متأخر</span>':'<span class="status s-present">حاضر</span>';
+    if(detailed)return `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(num)}</td><td>${fmtTime(r.check_in_time)}</td><td>${escapeHtml(r.source||'—')}</td><td>${status}</td></tr>`;
+    return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml(name[0]||'م')}</div>${escapeHtml(name)}</div></td><td>${fmtTime(r.check_in_time)}</td><td>📍 ${r.source==='whatsapp'?'واتساب':'النظام'}</td><td>${status}</td></tr>`;
+  }).join('');
+}
+function renderEmployees(){
+  const body=document.getElementById('employeesBody');
+  if(!employees.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#8290a2;padding:25px">لا يوجد موظفون بعد — اضغط إضافة موظف</td></tr>';return}
+  body.innerHTML=employees.map(e=>{
+    const dept=e.departments?.name||'—';
+    return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml((e.full_name||'م')[0])}</div>${escapeHtml(e.full_name)}</div></td><td>${escapeHtml(e.employee_number)}</td><td>${escapeHtml(e.phone_number)}</td><td>${escapeHtml(dept)}</td><td><span class="status ${e.is_active?'s-present':'s-missing'}">${e.is_active?'نشط':'غير نشط'}</span></td></tr>`;
+  }).join('');
+}
+function renderLocations(){
+  const html=locations.slice(0,8).map(l=>`<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>${escapeHtml(l.employees?.full_name||'موظف')}</b><div class="muted">${fmtTime(l.sent_at)} — ${Number(l.latitude).toFixed(5)}, ${Number(l.longitude).toFixed(5)}</div></div></div><span>›</span></div>`).join('');
+  document.getElementById('latestLocations').innerHTML=html||'<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>لا توجد مواقع بعد</b><div class="muted">ستظهر هنا مواقع الموظفين عند وصولها.</div></div></div></div>';
+  document.getElementById('locationsList').innerHTML=html||'<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>لا توجد مواقع بعد</b><div class="muted">بانتظار أول تسجيل موقع.</div></div></div></div>';
+  ['dashboardMap','locationsMap'].forEach(id=>{
+    const map=document.getElementById(id);
+    map.querySelectorAll('.dynamic-pin').forEach(p=>p.remove());
+    locations.slice(0,10).forEach((l,i)=>{
+      const p=document.createElement('div');
+      p.className='map-pin dynamic-pin '+['mp1','mp2','mp3'][i%3];
+      p.title=`${l.employees?.full_name||'موظف'} — ${l.latitude}, ${l.longitude}`;
+      p.innerHTML='<span>⌖</span>';
+      map.appendChild(p);
+    });
+    const badge=map.querySelector('.map-status');
+    if(badge) badge.innerHTML='<span class="live-dot"></span> '+locations.length+' موقع اليوم';
+  });
+}
+function renderChart(id){
+  const labels=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس'];
+  document.getElementById(id).innerHTML=labels.map((day,i)=>`<div class="bar-col"><div class="bars"><i class="bar" style="height:${55+i*7}%"></i><i class="bar late" style="height:${8+(i%3)*3}%"></i></div><small>${day}</small></div>`).join('');
+}
+function exportAttendanceCsv(){
+  const rows=[['الموظف','الرقم الوظيفي','وقت التسجيل','الحالة','المصدر']];
+  attendance.forEach(r=>rows.push([r.employees?.full_name||'',r.employees?.employee_number||'',fmtTime(r.check_in_time),r.status==='late'?'متأخر':'حاضر',r.source||'']));
+  const csv='\ufeff'+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`attendance-${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href);
+}
+async function loadDepartments(){
+  const {data,error}=await db.from('departments').select('id,name').order('name');
+  if(error)return;
+  departments=data||[];
+  document.getElementById('empDept').innerHTML=departments.map(d=>`<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+}
+function openEmployeeModal(){document.getElementById('employeeModal').style.display='flex';loadDepartments()}
+function closeEmployeeModal(){document.getElementById('employeeModal').style.display='none'}
+document.getElementById('addEmployeeBtn').addEventListener('click',openEmployeeModal);
+document.getElementById('saveEmployeeBtn').addEventListener('click',async()=>{
+  const payload={
+    employee_number:document.getElementById('empNumber').value.trim(),
+    full_name:document.getElementById('empName').value.trim(),
+    phone_number:document.getElementById('empPhone').value.trim(),
+    job_title:document.getElementById('empJob').value.trim()||null,
+    department_id:document.getElementById('empDept').value||null
+  };
+  if(!payload.employee_number||!payload.full_name||!payload.phone_number){showToast('عبّي الرقم الوظيفي والاسم ورقم الجوال');return}
+  const {error}=await db.from('employees').insert(payload);
+  if(error){showToast('تعذر حفظ الموظف: '+error.message);return}
+  closeEmployeeModal();
+  ['empNumber','empName','empPhone','empJob'].forEach(id=>document.getElementById(id).value='');
+  showToast('تمت إضافة الموظف بنجاح');
+  await loadAllData();
+});
+document.getElementById('refreshBtn').addEventListener('click',loadAllData);
+document.getElementById('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();showLogin()});
+document.getElementById('loginBtn').addEventListener('click',login);
+document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+async function login(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginError');
+  err.style.display='none';
+  if(!email||!password){err.textContent='أدخل البريد الإلكتروني وكلمة المرور.';err.style.display='block';return}
+  const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='جاري الدخول...';
+  const {error}=await db.auth.signInWithPassword({email,password});
+  btn.disabled=false;btn.textContent='دخول إلى النظام';
+  if(error){err.textContent='بيانات الدخول غير صحيحة أو الحساب غير مفعّل.';err.style.display='block';return}
+  await showApp();
+}
+function showLogin(){document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex'}
+async function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const {data:{user}}=await db.auth.getUser();
+  document.getElementById('userEmail').textContent=user?.email||'المدير العام';
+  document.getElementById('todayDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  showPage('dashboard');
+  await loadAllData();
+}
+db.auth.onAuthStateChange((_event,session)=>{
+  if(session) showApp(); else showLogin();
+});
+
+showLogin();
+</script>
+</body>
+</html>
