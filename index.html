@@ -55,7 +55,7 @@ button{cursor:pointer}
   background-size:52px 52px;transform:perspective(700px) rotateX(58deg) scale(1.4);transform-origin:center bottom;
 }
 .login-orbit{position:absolute;width:520px;height:520px;border:1px solid #ffffff20;border-radius:50%;left:-180px;bottom:-260px;box-shadow:0 0 0 45px #ffffff06,0 0 0 90px #ffffff04}
-.login-buildings{position:absolute;left:0;right:0;bottom:0;height:230px;opacity:.55}
+.login-buildings{position:absolute;left:0;right:0;bottom:0;height:280px;opacity:.62}
 .login-buildings i{position:absolute;bottom:0;background:linear-gradient(180deg,#113d64,#071a33);border:1px solid #ffffff12;border-bottom:0;border-radius:5px 5px 0 0;box-shadow:0 -10px 35px #0002}
 .login-buildings i:after{content:"";position:absolute;inset:15px 8px;background:repeating-linear-gradient(90deg,#62c8ff55 0 7px,transparent 7px 14px),repeating-linear-gradient(0deg,#62c8ff33 0 6px,transparent 6px 14px)}
 .login-buildings i:nth-child(1){width:90px;height:120px;left:7%}.login-buildings i:nth-child(2){width:130px;height:190px;left:17%}.login-buildings i:nth-child(3){width:75px;height:145px;left:34%}.login-buildings i:nth-child(4){width:115px;height:170px;right:18%}.login-buildings i:nth-child(5){width:70px;height:105px;right:8%}
@@ -152,6 +152,39 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 @media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.sidebar{width:220px}}
 @media(max-width:760px){.app{display:block}.sidebar{width:100%;height:auto;position:relative}.nav{grid-template-columns:repeat(3,1fr)}.nav button{justify-content:center}.nav button span{display:none}.content{padding:16px}.topbar{padding:0 16px}.search{display:none}.cards{grid-template-columns:1fr 1fr}.hero{padding:22px}.hero h1{font-size:23px}.date{display:none}.form-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.cards{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}}
+
+/* Animated location pins */
+.login-map-pins{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:3}
+.login-map-pin{
+  position:absolute;width:34px;height:34px;border-radius:50% 50% 50% 5px;
+  transform:rotate(-45deg);display:grid;place-items:center;
+  background:linear-gradient(135deg,#37c8ff,#1675ed);
+  border:3px solid #fff;box-shadow:0 8px 22px #0005;
+  animation:pinFloat 2.8s ease-in-out infinite;
+}
+.login-map-pin:before{
+  content:"";position:absolute;inset:-9px;border:2px solid #3ac5ff66;
+  border-radius:50%;transform:rotate(45deg);animation:pinPulse 2.2s ease-out infinite;
+}
+.login-map-pin:after{
+  content:"";position:absolute;inset:-17px;border:1px solid #53d2ff30;
+  border-radius:50%;transform:rotate(45deg);animation:pinPulse 2.2s ease-out infinite .5s;
+}
+.login-map-pin span{transform:rotate(45deg);color:#fff;font-size:15px;font-weight:900}
+.login-map-pin.p1{right:22%;top:28%;animation-delay:0s}
+.login-map-pin.p2{right:47%;top:49%;animation-delay:.7s;background:linear-gradient(135deg,#5de0b0,#159867)}
+.login-map-pin.p3{left:20%;top:35%;animation-delay:1.2s;background:linear-gradient(135deg,#7dc8ff,#296be7)}
+.login-map-route{
+  position:absolute;height:2px;background:linear-gradient(90deg,transparent,#43cfffaa,transparent);
+  transform-origin:right center;z-index:2;filter:drop-shadow(0 0 7px #3ecbff66);
+  animation:routeGlow 3s linear infinite;
+}
+.login-map-route.r1{width:280px;right:24%;top:43%;transform:rotate(19deg)}
+.login-map-route.r2{width:240px;right:43%;top:61%;transform:rotate(-23deg);animation-delay:1s}
+@keyframes pinFloat{0%,100%{margin-top:0}50%{margin-top:-8px}}
+@keyframes pinPulse{0%{opacity:.8;transform:rotate(45deg) scale(.65)}75%,100%{opacity:0;transform:rotate(45deg) scale(1.45)}}
+@keyframes routeGlow{0%{opacity:.25}50%{opacity:1}100%{opacity:.25}}
+
 </style>
 </head>
 <body>
@@ -165,16 +198,22 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
         <div class="login-brand-mark">س</div>
         <div><b>سجل</b><small>Employee Attendance Platform</small></div>
       </div>
-      <div>
-        <h2>كل حضور.<br>في مكان واحد.</h2>
-        <p>منصة تشغيلية لمتابعة حضور الموظفين ومواقعهم لحظة بلحظة، بتصميم مؤسسي واضح ومعلومات منظمة.</p>
-        <div class="login-features">
-          <div class="login-feature"><b>📍 المواقع</b><span>تسجيل المواقع</span></div>
-          <div class="login-feature"><b>◷ الحضور</b><span>متابعة يومية</span></div>
-          <div class="login-feature"><b>▥ التقارير</b><span>بيانات منظمة</span></div>
+      <div style="position:relative;z-index:2">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #ffffff20;background:#ffffff0b;border-radius:999px;color:#b9d8ed;font-size:11px">
+          <span style="width:7px;height:7px;border-radius:50%;background:#36d89a;box-shadow:0 0 0 5px #36d89a18"></span>
+          النظام متصل
         </div>
+        <h2>حضورك<br>على الخريطة.</h2>
+        <p>متابعة الحضور والمواقع في واجهة تشغيلية واحدة، مع تسجيلات مباشرة ومواقع واضحة.</p>
       </div>
-      <small style="color:#86a8c4;position:relative;z-index:2">نظام إدارة الحضور • الإصدار التشغيلي 0.1</small>
+      <div class="login-map-pins">
+        <div class="login-map-route r1"></div>
+        <div class="login-map-route r2"></div>
+        <div class="login-map-pin p1"><span>⌖</span></div>
+        <div class="login-map-pin p2"><span>⌖</span></div>
+        <div class="login-map-pin p3"><span>⌖</span></div>
+      </div>
+      <small style="color:#86a8c4;position:relative;z-index:4">نظام إدارة الحضور • الإصدار التشغيلي 0.1</small>
     </section>
     <section class="login-card">
       <div class="login-form-title">لوحة الإدارة</div>
