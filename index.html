@@ -198,24 +198,6 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 @keyframes pinPulse{0%{opacity:.8;transform:rotate(45deg) scale(.65)}75%,100%{opacity:0;transform:rotate(45deg) scale(1.45)}}
 @keyframes routeGlow{0%{opacity:.25}50%{opacity:1}100%{opacity:.25}}
 
-
-/* ===== Employees management layer ===== */
-.toast{display:none;align-items:center;gap:8px;font-family:inherit;font-weight:600;border-right:4px solid #39b7e9;max-width:min(440px,calc(100vw - 50px))}
-.toast.success{border-right-color:#18a868}.toast.error{border-right-color:#ea515c;background:#3a1420}
-.modal{max-height:92vh;overflow:auto;animation:modalIn .18s ease-out}
-@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-.field.full{grid-column:1/-1}
-.modal-actions{display:flex;gap:10px;margin-top:20px}.modal-actions button{flex:1}
-.ghost-btn{border:1px solid #dfe7f0;background:#fff;color:#38506a;padding:11px 18px;border-radius:11px;font-weight:800}.ghost-btn:hover{background:#f4f7fb}
-.danger-btn{border:0;background:#d83b4b;color:#fff;padding:11px 18px;border-radius:11px;font-weight:800}.danger-btn:hover{background:#bf2d3d}
-.danger-btn:disabled,.primary-btn:disabled{opacity:.6;cursor:wait}
-.warn-icon{width:56px;height:56px;border-radius:16px;background:#ffebee;color:#d83b4b;display:grid;place-items:center;font-size:26px;margin:0 auto 14px}
-.confirm-box{text-align:center}.confirm-box h3{margin:0 0 8px;font-size:20px}.confirm-box p{margin:0;color:#68788d;line-height:1.9}
-.emp-sub{display:block;font-size:11px;color:#8290a2;font-weight:400;margin-top:2px}
-.action-btn{transition:.15s}.action-edit:hover{background:#d6e8ff}.action-delete:hover{background:#ffdede}
-.mini-select{border:1px solid #dfe7f0;border-radius:9px;padding:6px 9px;background:#fbfdff;font-family:inherit}
-.role-owner{background:#e7f1ff;color:#1268ca}
-@media(max-width:760px){.toast{left:12px;bottom:12px}.modal-actions{flex-direction:column-reverse}}
 </style>
 </head>
 <body>
@@ -368,9 +350,17 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
     </section>
 
     <section id="page-accounts" class="page panel" style="display:none">
-      <div class="page-head"><div><h2>الحسابات والصلاحيات</h2><p>كل مستخدم له حساب مستقل وصلاحية محددة. حساب مدير النظام الأساسي محمي.</p></div><button id="addAccountBtn" class="primary-btn" style="display:none">+ إضافة حساب</button></div>
-      <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الصلاحية</th><th>حالة الحساب</th><th>الإجراءات</th></tr></thead><tbody id="accountsBody"></tbody></table></div></div>
-      <div class="loc" style="margin-top:12px"><div><b>حماية مدير النظام</b><div class="muted">لا يمكن حذف حساب Owner أو تغيير صلاحيته من الواجهة.</div></div><span class="status s-present">محمي</span></div>
+      <div class="page-head"><div><h2>الحسابات والصلاحيات</h2><p>كل مستخدم له حساب مستقل وصلاحية محددة.</p></div></div>
+      <div class="panel">
+        <div class="loc">
+          <div class="loc-left"><div class="loc-icon">♙</div><div><b id="accountName">ريان</b><div class="muted" id="accountEmail">—</div></div></div>
+          <div style="text-align:left"><span class="status s-present">مدير النظام</span><div class="muted" style="margin-top:6px">الحساب الأساسي محمي</div></div>
+        </div>
+        <div class="loc" style="margin-top:12px">
+          <div><b>حماية مدير النظام</b><div class="muted">لا يمكن للمستخدمين الآخرين حذف هذا الحساب أو تغيير صلاحيته.</div></div>
+          <span class="status s-present">محمي</span>
+        </div>
+      </div>
     </section>
     <section id="page-settings" class="page panel" style="display:none">
       <div class="page-head"><div><h2>الإعدادات</h2><p>إعدادات النظام والخدمات.</p></div></div>
@@ -387,40 +377,16 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 
 <div id="employeeModal" class="modal-backdrop">
   <div class="modal">
-    <div class="modal-head"><h3 id="employeeModalTitle">إضافة موظف</h3><button class="close" onclick="closeEmployeeModal()" aria-label="إغلاق">×</button></div>
+    <div class="modal-head"><h3 id="employeeModalTitle">إضافة موظف</h3><button class="close" onclick="closeEmployeeModal()">×</button></div>
     <input type="hidden" id="empId">
     <div class="form-grid">
-      <div class="field"><label>اسم الموظف</label><input id="empName" placeholder="أحمد الحربي"></div>
       <div class="field"><label>الرقم الوظيفي</label><input id="empNumber" placeholder="1001"></div>
-      <div class="field"><label>رقم الجوال</label><input id="empPhone" placeholder="9665xxxxxxxx" inputmode="tel"></div>
-      <div class="field"><label>القسم</label><select id="empDept"></select></div>
+      <div class="field"><label>اسم الموظف</label><input id="empName" placeholder="أحمد الحربي"></div>
+      <div class="field"><label>رقم الجوال</label><input id="empPhone" placeholder="9665xxxxxxxx"></div>
       <div class="field"><label>المسمى الوظيفي</label><input id="empJob" placeholder="موظف ميداني"></div>
-      <div class="field"><label>حالة الموظف</label><select id="empActive"><option value="true">نشط</option><option value="false">غير نشط</option></select></div>
+      <div class="field"><label>القسم</label><select id="empDept"></select></div>
     </div>
-    <div class="modal-actions"><button class="ghost-btn" onclick="closeEmployeeModal()">إلغاء</button><button id="saveEmployeeBtn" class="primary-btn">حفظ الموظف</button></div>
-  </div>
-</div>
-
-<div id="deleteModal" class="modal-backdrop">
-  <div class="modal confirm-box" style="width:min(440px,100%)">
-    <div class="warn-icon">🗑️</div>
-    <h3>هل أنت متأكد من حذف الموظف؟</h3>
-    <p id="deleteModalName" style="font-weight:800;color:#142033;margin-bottom:6px"></p>
-    <p>سيتم حذف بيانات الموظف وسجلات الحضور والمواقع المرتبطة به.</p>
-    <div class="modal-actions"><button class="ghost-btn" onclick="closeDeleteModal()">إلغاء</button><button id="confirmDeleteBtn" class="danger-btn">حذف الموظف</button></div>
-  </div>
-</div>
-
-<div id="accountModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-head"><h3>إضافة حساب إداري</h3><button class="close" onclick="closeAccountModal()" aria-label="إغلاق">×</button></div>
-    <div class="form-grid">
-      <div class="field"><label>الاسم</label><input id="accName"></div>
-      <div class="field"><label>البريد الإلكتروني</label><input id="accEmail" type="email" dir="ltr"></div>
-      <div class="field"><label>كلمة مرور مؤقتة</label><input id="accPassword" type="password" dir="ltr" autocomplete="new-password"></div>
-      <div class="field"><label>الصلاحية</label><select id="accRole"><option value="admin">مدير (admin)</option><option value="manager">مشرف (manager)</option><option value="viewer">مشاهد (viewer)</option></select></div>
-    </div>
-    <div class="modal-actions"><button class="ghost-btn" onclick="closeAccountModal()">إلغاء</button><button id="saveAccountBtn" class="primary-btn">إنشاء الحساب</button></div>
+    <button id="saveEmployeeBtn" class="primary-btn" style="width:100%;margin-top:18px">حفظ الموظف</button>
   </div>
 </div>
 
@@ -454,16 +420,14 @@ function fmtTime(value){
   if(!value) return '—';
   return new Date(value).toLocaleTimeString('ar-SA',{hour:'numeric',minute:'2-digit'});
 }
-function showToast(msg,type='success'){
-  const el=document.getElementById('toast');
-  el.className='toast '+type; el.textContent=(type==='error'?'⚠ ':'✓ ')+msg; el.style.display='flex';
-  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',type==='error'?4500:3000);
+function showToast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block';
+  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',3000);
 }
 function escapeHtml(v){
   return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
-let currentPage='dashboard';
-function showPage(key){currentPage=key;
+function showPage(key){
   document.getElementById('dashboardView').style.display=key==='dashboard'?'block':'none';
   document.getElementById('pageArea').style.display=key==='dashboard'?'none':'block';
   document.querySelectorAll('.page').forEach(p=>p.style.display='none');
@@ -489,7 +453,7 @@ async function loadAllData(){
     renderAll();
   }catch(err){
     console.error(err);
-    showToast('تعذر تحميل البيانات، حاول مرة أخرى.','error');
+    showToast('تعذر تحميل البيانات: '+(err.message||'تحقق من اتصال Supabase'));
   }finally{document.body.classList.remove('loading')}
 }
 
@@ -532,36 +496,12 @@ function renderAttendance(id, rows, detailed){
     return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml(name[0]||'م')}</div>${escapeHtml(name)}</div></td><td>${fmtTime(r.check_in_time)}</td><td>📍 ${r.source==='whatsapp'?'واتساب':'النظام'}</td><td>${status}</td></tr>`;
   }).join('');
 }
-const PERMISSIONS={owner:['accounts','emp_add','emp_edit','emp_delete'],admin:['emp_add','emp_edit','emp_delete'],manager:['emp_add','emp_edit'],viewer:[]};
-const can=p=>(PERMISSIONS[currentAdmin?.role]||[]).includes(p);
-const EMP_SELECT='id,employee_number,full_name,phone_number,job_title,is_active,department_id,departments(name)';
-const sameId=(a,b)=>String(a)===String(b);
-const AR_DIGITS='٠١٢٣٤٥٦٧٨٩';
-const latinDigits=v=>String(v??'').replace(/[٠-٩]/g,d=>AR_DIGITS.indexOf(d));
-function norm(v){return latinDigits(v).toLowerCase().replace(/[\u064B-\u065F\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim()}
-function friendlyError(err){
-  if(err?.code==='23505')return 'الرقم الوظيفي أو رقم الجوال مسجّل مسبقًا لموظف آخر.';
-  if(err?.code==='42501'||err?.code==='NOPERM')return 'لا تملك صلاحية تنفيذ هذه العملية.';
-  if(err?.code==='23503')return 'تعذر الحذف لوجود بيانات مرتبطة بالموظف.';
-  return 'تعذر تنفيذ العملية، حاول مرة أخرى.';
-}
-function sortEmployees(){employees.sort((a,b)=>String(a.full_name).localeCompare(String(b.full_name),'ar'))}
-function filteredEmployees(){
-  const q=norm(document.getElementById('searchInput').value);
-  if(!q)return employees;
-  return employees.filter(e=>[e.full_name,e.employee_number,e.phone_number].some(v=>norm(v).includes(q)));
-}
 function renderEmployees(){
   const body=document.getElementById('employeesBody');
-  const list=filteredEmployees();
-  if(!list.length){
-    const msg=employees.length?'لا توجد نتائج مطابقة للبحث':'لا يوجد موظفون حتى الآن';
-    body.innerHTML=`<tr><td colspan="6" style="text-align:center;color:#8290a2;padding:25px">${msg}</td></tr>`;return;
-  }
-  body.innerHTML=list.map(e=>{
+  if(!employees.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#8290a2;padding:25px">لا يوجد موظفون بعد — اضغط إضافة موظف</td></tr>';return}
+  body.innerHTML=employees.map(e=>{
     const dept=e.departments?.name||'—';
-    const btns=(can('emp_edit')?`<button class="action-btn action-edit" onclick="editEmployee('${escapeHtml(e.id)}')">✏️ تعديل</button>`:'')+(can('emp_delete')?`<button class="action-btn action-delete" onclick="deleteEmployee('${escapeHtml(e.id)}')">🗑️ حذف</button>`:'');
-    return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml((e.full_name||'م')[0])}</div><div>${escapeHtml(e.full_name)}${e.job_title?`<span class="emp-sub">${escapeHtml(e.job_title)}</span>`:''}</div></div></td><td>${escapeHtml(e.employee_number)}</td><td>${escapeHtml(e.phone_number)}</td><td>${escapeHtml(dept)}</td><td><span class="status ${e.is_active?'s-present':'s-missing'}">${e.is_active?'نشط':'غير نشط'}</span></td><td>${btns?`<div class="actions-cell">${btns}</div>`:'—'}</td></tr>`;
+    return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml((e.full_name||'م')[0])}</div>${escapeHtml(e.full_name)}</div></td><td>${escapeHtml(e.employee_number)}</td><td>${escapeHtml(e.phone_number)}</td><td>${escapeHtml(dept)}</td><td><span class="status ${e.is_active?'s-present':'s-missing'}">${e.is_active?'نشط':'غير نشط'}</span></td><td><div class="actions-cell"><button class="action-btn action-edit" onclick="editEmployee('${e.id}')">تعديل</button><button class="action-btn action-delete" onclick="deleteEmployee('${e.id}')">حذف</button></div></td></tr>`;
   }).join('');
 }
 function renderLocations(){
@@ -593,166 +533,68 @@ function exportAttendanceCsv(){
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`attendance-${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href);
 }
-async function ensureDepartments(){
-  if(departments.length)return;
-  try{const {data,error}=await db.from('departments').select('id,name').order('name');if(error)throw error;departments=data||[]}
-  catch(err){console.error(err);showToast('تعذر تحميل الأقسام','error')}
+async function loadDepartments(){
+  const {data,error}=await db.from('departments').select('id,name').order('name');
+  if(error)return;
+  departments=data||[];
+  document.getElementById('empDept').innerHTML=departments.map(d=>`<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
 }
-function fillDeptSelect(selectedId){
-  document.getElementById('empDept').innerHTML='<option value="">— بدون قسم —</option>'+departments.map(d=>`<option value="${escapeHtml(d.id)}" ${sameId(d.id,selectedId)?'selected':''}>${escapeHtml(d.name)}</option>`).join('');
-}
-async function openEmployeeModal(employee=null){
-  if(!can(employee?'emp_edit':'emp_add')){showToast('لا تملك صلاحية تنفيذ هذه العملية.','error');return}
+function openEmployeeModal(employee=null){
+  const modal=document.getElementById('employeeModal');
   document.getElementById('employeeModalTitle').textContent=employee?'تعديل بيانات الموظف':'إضافة موظف';
-  document.getElementById('saveEmployeeBtn').textContent=employee?'حفظ التعديلات':'حفظ الموظف';
-  document.getElementById('empId').value=employee?.id??'';
+  document.getElementById('empId').value=employee?.id||'';
   document.getElementById('empNumber').value=employee?.employee_number||'';
   document.getElementById('empName').value=employee?.full_name||'';
   document.getElementById('empPhone').value=employee?.phone_number||'';
   document.getElementById('empJob').value=employee?.job_title||'';
-  document.getElementById('empActive').value=employee&&employee.is_active===false?'false':'true';
-  fillDeptSelect(employee?.department_id??'');
-  document.getElementById('employeeModal').style.display='flex';
-  await ensureDepartments();
-  fillDeptSelect(employee?.department_id??document.getElementById('empDept').value);
+  modal.style.display='flex';
+  loadDepartments(employee?.department_id||'');
 }
 function closeEmployeeModal(){document.getElementById('employeeModal').style.display='none'}
-function editEmployee(id){const e=employees.find(x=>sameId(x.id,id));if(e)openEmployeeModal(e)}
-
-let pendingDeleteId=null;
-function deleteEmployee(id){
-  if(!can('emp_delete')){showToast('لا تملك صلاحية تنفيذ هذه العملية.','error');return}
-  const e=employees.find(x=>sameId(x.id,id));if(!e)return;
-  pendingDeleteId=e.id;
-  document.getElementById('deleteModalName').textContent=e.full_name;
-  document.getElementById('deleteModal').style.display='flex';
+async function loadDepartments(selectedId=''){
+  const {data,error}=await db.from('departments').select('id,name').order('name');
+  if(error){showToast('تعذر تحميل الأقسام');return}
+  departments=data||[];
+  document.getElementById('empDept').innerHTML=departments.map(d=>`<option value="${d.id}" ${d.id===selectedId?'selected':''}>${escapeHtml(d.name)}</option>`).join('');
 }
-function closeDeleteModal(){document.getElementById('deleteModal').style.display='none';pendingDeleteId=null}
-document.getElementById('confirmDeleteBtn').addEventListener('click',async()=>{
-  const id=pendingDeleteId;if(id==null)return;
-  const btn=document.getElementById('confirmDeleteBtn');btn.disabled=true;btn.textContent='جاري الحذف...';
-  try{
-    let {data,error}=await db.from('employees').delete().eq('id',id).select('id');
-    if(error&&error.code==='23503'){ // سجلات مرتبطة بدون ON DELETE CASCADE: نحذفها أولاً ثم نعيد المحاولة
-      const a=await db.from('attendance').delete().eq('employee_id',id);if(a.error)throw a.error;
-      const l=await db.from('locations').delete().eq('employee_id',id);if(l.error)throw l.error;
-      ({data,error}=await db.from('employees').delete().eq('id',id).select('id'));
-    }
-    if(error)throw error;
-    if(!data||!data.length)throw Object.assign(new Error('no rows deleted (RLS?)'),{code:'NOPERM'});
-    employees=employees.filter(e=>!sameId(e.id,id));
-    attendance=attendance.filter(r=>!sameId(r.employee_id,id));
-    locations=locations.filter(r=>!sameId(r.employee_id,id));
-    closeDeleteModal();renderAll();showToast('تم حذف الموظف بنجاح');
-  }catch(err){console.error('delete employee:',err);showToast(friendlyError(err),'error')}
-  finally{btn.disabled=false;btn.textContent='حذف الموظف'}
-});
-
+function editEmployee(id){
+  const employee=employees.find(e=>e.id===id);
+  if(employee) openEmployeeModal(employee);
+}
+async function deleteEmployee(id){
+  const employee=employees.find(e=>e.id===id);
+  if(!employee)return;
+  const ok=confirm(`هل أنت متأكد من حذف الموظف «${employee.full_name}»؟\nسيتم حذف سجلات حضوره ومواقعه المرتبطة به.`);
+  if(!ok)return;
+  const {error}=await db.from('employees').delete().eq('id',id);
+  if(error){showToast('تعذر حذف الموظف: '+error.message);return}
+  showToast('تم حذف الموظف بنجاح');
+  await loadAllData();
+}
 document.getElementById('addEmployeeBtn').addEventListener('click',()=>openEmployeeModal());
 document.getElementById('saveEmployeeBtn').addEventListener('click',async()=>{
   const id=document.getElementById('empId').value.trim();
   const payload={
-    employee_number:latinDigits(document.getElementById('empNumber').value).trim(),
+    employee_number:document.getElementById('empNumber').value.trim(),
     full_name:document.getElementById('empName').value.trim(),
-    phone_number:latinDigits(document.getElementById('empPhone').value).replace(/\s+/g,''),
+    phone_number:document.getElementById('empPhone').value.trim(),
     job_title:document.getElementById('empJob').value.trim()||null,
     department_id:document.getElementById('empDept').value||null,
-    is_active:document.getElementById('empActive').value==='true',
     updated_at:new Date().toISOString()
   };
-  if(!payload.employee_number||!payload.full_name||!payload.phone_number){showToast('عبّي الاسم والرقم الوظيفي ورقم الجوال','error');return}
+  if(!payload.employee_number||!payload.full_name||!payload.phone_number){showToast('عبّي الرقم الوظيفي والاسم ورقم الجوال');return}
   const btn=document.getElementById('saveEmployeeBtn');
-  btn.disabled=true;btn.textContent=id?'جاري حفظ التعديلات...':'جاري الحفظ...';
-  try{
-    if(id){
-      const {data,error}=await db.from('employees').update(payload).eq('id',id).select(EMP_SELECT);
-      if(error)throw error;
-      if(!data||!data.length)throw Object.assign(new Error('no rows updated (RLS?)'),{code:'NOPERM'});
-      employees=employees.map(e=>sameId(e.id,id)?data[0]:e);
-    }else{
-      const {data,error}=await db.from('employees').insert(payload).select(EMP_SELECT).single();
-      if(error)throw error;
-      employees.push(data);
-    }
-    sortEmployees();closeEmployeeModal();renderAll();
-    showToast(id?'تم تحديث بيانات الموظف بنجاح':'تمت إضافة الموظف بنجاح');
-  }catch(err){console.error('save employee:',err);showToast(friendlyError(err),'error')}
-  finally{btn.disabled=false;btn.textContent=id?'حفظ التعديلات':'حفظ الموظف'}
+  btn.disabled=true;btn.textContent=id?'جاري حفظ التعديل...':'جاري الحفظ...';
+  const result=id
+    ? await db.from('employees').update(payload).eq('id',id)
+    : await db.from('employees').insert(payload);
+  btn.disabled=false;btn.textContent='حفظ الموظف';
+  if(result.error){showToast('تعذر حفظ الموظف: '+result.error.message);return}
+  closeEmployeeModal();
+  ['empId','empNumber','empName','empPhone','empJob'].forEach(x=>document.getElementById(x).value='');
+  showToast(id?'تم تعديل بيانات الموظف بنجاح':'تمت إضافة الموظف بنجاح');
+  await loadAllData();
 });
-
-// البحث المباشر (الاسم / الرقم الوظيفي / الجوال)
-document.getElementById('searchInput').addEventListener('input',e=>{
-  if(e.target.value.trim()&&currentPage!=='employees')showPage('employees');
-  renderEmployees();
-});
-// إغلاق النوافذ بالضغط خارجها أو Esc
-[['employeeModal',closeEmployeeModal],['deleteModal',closeDeleteModal],['accountModal',()=>closeAccountModal()]].forEach(([id,fn])=>{
-  document.getElementById(id).addEventListener('mousedown',e=>{if(e.target.id===id)fn()});
-});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeEmployeeModal();closeDeleteModal();closeAccountModal()}});
-
-// ===== الحسابات والصلاحيات =====
-const ROLE_NAMES={owner:'مدير النظام',admin:'مدير',manager:'مشرف',viewer:'مشاهد'};
-let adminAccounts=[];
-async function loadAdminAccounts(){
-  try{
-    const {data,error}=await db.from('admin_users').select('id,full_name,email,role,is_active').order('full_name');
-    if(error)throw error;
-    adminAccounts=data||[];
-  }catch(err){console.error('admin accounts:',err);adminAccounts=currentAdmin&&!currentAdmin.unlinked?[currentAdmin]:[]}
-  renderAccounts();
-}
-function renderAccounts(){
-  const body=document.getElementById('accountsBody');
-  if(!adminAccounts.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#8290a2;padding:25px">لا توجد حسابات</td></tr>';return}
-  const manage=can('accounts');
-  body.innerHTML=adminAccounts.map(a=>{
-    const isOwner=a.role==='owner';
-    const roleCell=(!isOwner&&manage)
-      ?`<select class="mini-select" onchange="changeAccountRole('${escapeHtml(a.id)}',this.value)">${['admin','manager','viewer'].map(r=>`<option value="${r}" ${a.role===r?'selected':''}>${ROLE_NAMES[r]} (${r})</option>`).join('')}</select>`
-      :`<span class="status ${isOwner?'role-owner':'s-late'}">${ROLE_NAMES[a.role]||escapeHtml(a.role)}${isOwner?' (owner)':''}</span>`;
-    const act=isOwner?'<span class="muted">🔒 الحساب الأساسي محمي</span>'
-      :(manage?`<button class="action-btn ${a.is_active===false?'action-edit':'action-delete'}" onclick="toggleAccount('${escapeHtml(a.id)}')">${a.is_active===false?'تفعيل':'تعطيل'}</button>`:'—');
-    return `<tr><td>${escapeHtml(a.full_name||'—')}</td><td dir="ltr" style="text-align:right">${escapeHtml(a.email||'—')}</td><td>${roleCell}</td><td><span class="status ${a.is_active===false?'s-missing':'s-present'}">${a.is_active===false?'معطّل':'نشط'}</span></td><td>${act}</td></tr>`;
-  }).join('');
-}
-async function updateAccount(id,fields){
-  const a=adminAccounts.find(x=>sameId(x.id,id));
-  if(!a||a.role==='owner'||!can('accounts')){showToast('لا تملك صلاحية تنفيذ هذه العملية.','error');return}
-  try{
-    const {data,error}=await db.from('admin_users').update(fields).eq('id',id).neq('role','owner').select('id,full_name,email,role,is_active');
-    if(error)throw error;
-    if(!data||!data.length)throw Object.assign(new Error('no rows updated'),{code:'NOPERM'});
-    adminAccounts=adminAccounts.map(x=>sameId(x.id,id)?data[0]:x);
-    showToast('تم تحديث الحساب بنجاح');
-  }catch(err){console.error('update account:',err);showToast(friendlyError(err),'error')}
-  renderAccounts();
-}
-function changeAccountRole(id,role){if(['admin','manager','viewer'].includes(role))updateAccount(id,{role})}
-function toggleAccount(id){const a=adminAccounts.find(x=>sameId(x.id,id));if(a)updateAccount(id,{is_active:a.is_active===false})}
-function openAccountModal(){if(!can('accounts'))return;['accName','accEmail','accPassword'].forEach(i=>document.getElementById(i).value='');document.getElementById('accountModal').style.display='flex'}
-function closeAccountModal(){document.getElementById('accountModal').style.display='none'}
-// جاهز للربط: إنشاء مستخدم Auth يحتاج Service Role على الخادم فقط (Edge Function باسم create-admin-user)
-async function createAdminAccount(payload){
-  const {data,error}=await db.functions.invoke('create-admin-user',{body:payload});
-  if(error)throw error;return data;
-}
-document.getElementById('addAccountBtn').addEventListener('click',openAccountModal);
-document.getElementById('saveAccountBtn').addEventListener('click',async()=>{
-  const payload={full_name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim().toLowerCase(),password:document.getElementById('accPassword').value,role:document.getElementById('accRole').value};
-  if(!payload.full_name||!payload.email||payload.password.length<8){showToast('أدخل الاسم والبريد وكلمة مرور من 8 أحرف على الأقل','error');return}
-  if(payload.role==='owner'){showToast('لا يمكن إنشاء حساب Owner من الواجهة.','error');return}
-  const btn=document.getElementById('saveAccountBtn');btn.disabled=true;
-  try{await createAdminAccount(payload);closeAccountModal();showToast('تمت إضافة الحساب بنجاح');await loadAdminAccounts()}
-  catch(err){console.error('create admin account:',err);showToast('إنشاء الحسابات يحتاج ربط Edge Function آمن (create-admin-user) — لم يتم ربطه بعد.','error')}
-  finally{btn.disabled=false}
-});
-function applyPermissions(){
-  document.getElementById('addEmployeeBtn').style.display=can('emp_add')?'':'none';
-  document.getElementById('addAccountBtn').style.display=can('accounts')?'':'none';
-  const nav=navButtons.find(b=>b.dataset.page==='accounts');
-  if(nav)nav.style.display=['owner','admin'].includes(currentAdmin?.role)?'':'none';
-}
 document.getElementById('refreshBtn').addEventListener('click',loadAllData);
 document.getElementById('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();showLogin()});
 document.getElementById('loginBtn').addEventListener('click',login);
@@ -769,33 +611,28 @@ async function login(){
   if(error){err.textContent='بيانات الدخول غير صحيحة أو الحساب غير مفعّل.';err.style.display='block';return}
   await showApp();
 }
-function showLogin(){appUserId=null;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex'}
-let appUserId=null;
+function showLogin(){document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex'}
 async function showApp(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='flex';
   const {data:{user}}=await db.auth.getUser();
   if(!user){showLogin();return}
-  if(appUserId===user.id)return; // تجاهل أحداث المصادقة المتكررة (تحديث التوكن/العودة للتبويب)
-  appUserId=user.id;
 
-  let admin=null;
-  try{
-    const cols='id,full_name,email,role,is_active';
-    let r=await db.from('admin_users').select(cols).eq('auth_user_id',user.id).maybeSingle();
-    if(r.error)throw r.error;
-    admin=r.data;
-    if(!admin&&user.email){r=await db.from('admin_users').select(cols).eq('email',user.email.toLowerCase()).maybeSingle();if(!r.error)admin=r.data}
-  }catch(error){console.error('admin profile lookup:',error)}
+  const {data:admin,error}=await db.from('admin_users')
+    .select('id,full_name,email,role,is_active')
+    .eq('auth_user_id',user.id)
+    .maybeSingle();
+
+  if(error){
+    console.warn('admin profile lookup:',error.message);
+  }
 
   currentAdmin=admin||{
-    full_name:user.user_metadata?.full_name||(user.email||'').split('@')[0]||'مستخدم',
+    full_name:user.user_metadata?.full_name||'ريان',
     email:user.email||'',
-    role:'viewer',
-    is_active:true,
-    unlinked:true
+    role:'owner',
+    is_active:true
   };
-  if(currentAdmin.unlinked)setTimeout(()=>showToast('حسابك غير مربوط بجدول admin_users، الصلاحية الحالية: مشاهدة فقط.','error'),700);
 
   if(currentAdmin.is_active===false){
     await db.auth.signOut();
@@ -811,11 +648,12 @@ async function showApp(){
   document.getElementById('currentUserRole').textContent=role;
   document.getElementById('currentUserAvatar').textContent=name.trim().charAt(0)||'ر';
   document.getElementById('welcomeTitle').textContent='مرحبًا '+name;
+  document.getElementById('accountName').textContent=name;
+  document.getElementById('accountEmail').textContent=currentAdmin.email||user.email||'—';
   updateDateUI();
 
-  applyPermissions();
   showPage('dashboard');
-  await Promise.all([loadAllData(),loadAdminAccounts()]);
+  await loadAllData();
 }
 db.auth.onAuthStateChange((_event,session)=>{
   if(session) showApp(); else showLogin();
