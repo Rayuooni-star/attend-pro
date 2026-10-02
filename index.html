@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>سجل | نظام حضور الموظفين</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;background:#f4f7fb;color:#142033}
@@ -31,7 +33,7 @@ button{cursor:pointer}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}.card{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}
 .metric{display:flex;align-items:center;justify-content:space-between}.metric .icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px}.green{background:#e7f8ef;color:#15955a}.amber{background:#fff5dd;color:#c7860b}.red{background:#ffebee;color:#d83b4b}.blue{background:#e7f1ff;color:#1471db}.metric h2{margin:0;font-size:29px}.metric p{margin:6px 0 0;color:#68788d;font-weight:700}
 .grid{display:grid;grid-template-columns:1.15fr 1.6fr 1fr;gap:18px;margin-top:18px}.panel{background:#fff;border:1px solid #e5ebf2;border-radius:17px;padding:20px;box-shadow:0 8px 25px #193d6810}.panel h3{margin:0 0 16px;font-size:18px}
-.map{height:290px;border-radius:14px;background:linear-gradient(135deg,#dfeaf2,#c9d9e5);position:relative;overflow:hidden}.map:before,.map:after{content:'';position:absolute;background:#fff;opacity:.7}.map:before{width:120%;height:3px;top:48%;left:-10%;transform:rotate(-18deg);box-shadow:0 65px 0 #fff,0 -70px 0 #fff}.map:after{height:120%;width:3px;left:45%;top:-10%;transform:rotate(23deg);box-shadow:70px 0 0 #fff,-90px 0 0 #fff}
+.leaflet-map{height:290px;width:100%;border-radius:14px;overflow:hidden;border:1px solid #dce6f0;z-index:1}.map-preview{height:220px;width:100%;border-radius:14px;overflow:hidden;border:1px solid #dce6f0;margin-top:14px;display:none}.map-preview.show{display:block}.leaflet-control-attribution{font-size:9px!important}.map{height:290px;border-radius:14px;background:linear-gradient(135deg,#dfeaf2,#c9d9e5);position:relative;overflow:hidden}.map:before,.map:after{content:'';position:absolute;background:#fff;opacity:.7}.map:before{width:120%;height:3px;top:48%;left:-10%;transform:rotate(-18deg);box-shadow:0 65px 0 #fff,0 -70px 0 #fff}.map:after{height:120%;width:3px;left:45%;top:-10%;transform:rotate(23deg);box-shadow:70px 0 0 #fff,-90px 0 0 #fff}
 .pin{position:absolute;width:22px;height:22px;border:4px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 10px #0003}.p1{top:28%;left:25%;background:#16a56b}.p2{top:55%;left:52%;background:#1b7be0}.p3{top:39%;left:72%;background:#ef4c57}
 .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 8px;border-bottom:1px solid #edf1f5;text-align:right;white-space:nowrap}.table th{font-size:12px;color:#75859a;background:#f8fafc}
 .status{display:inline-block;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:800}.s-present{background:#e5f8ee;color:#118353}.s-late{background:#fff3d8;color:#a66c00}.s-missing{background:#ffe8ec;color:#c83446}
@@ -153,6 +155,16 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 .status{letter-spacing:.1px}
 
 
+/* Attendance + action controls */
+.actions-cell{display:flex;gap:7px;align-items:center;justify-content:center;flex-wrap:wrap}
+.action-btn{border:1px solid #dce6f0;background:#fff;border-radius:9px;padding:7px 11px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.18s}
+.action-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px #173b5512}
+.action-edit{color:#1668c7;border-color:#cfe1f4;background:#f7fbff}
+.action-delete{color:#d43b48;border-color:#f2d0d4;background:#fff8f8}
+.action-link{color:#168a62;border-color:#cfeee1;background:#f5fffb;text-decoration:none;display:inline-flex;align-items:center}
+.modal{width:min(640px,calc(100vw - 30px));max-height:calc(100vh - 40px);overflow:auto}
+.modal .field{min-width:0}
+.modal input,.modal select{max-width:100%;box-sizing:border-box}
 /* Interior typography + interaction polish */
 .nav button{font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
 .page-head h2,.panel h3,.metric p,.card,.table,.profile,.hero{font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
@@ -313,9 +325,25 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 
   <div id="pageArea" class="page-area" style="display:none">
     <section id="page-attendance" class="page panel" style="display:none">
-      <div class="page-head"><div><h2>التحضير اليومي</h2><p>متابعة حضور الموظفين وتسجيلات المواقع لهذا اليوم.</p></div><button class="primary-btn" onclick="loadAllData()">تحديث التحضير</button></div>
-      <div class="cards"><div class="card"><div class="metric"><div><h2 id="pagePresent">0</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div><div class="card"><div class="metric"><div><h2 id="pageLate">0</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div><div class="card"><div class="metric"><div><h2 id="pageMissing">0</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div></div>
-      <div class="panel"><h3>سجل التحضير</h3><div class="table-wrap"><table class="table"><thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>وقت الإرسال</th><th>المصدر</th><th>الحالة</th></tr></thead><tbody id="attendanceBody"></tbody></table></div></div>
+      <div class="page-head">
+        <div><h2>التحضير اليومي</h2><p>إضافة وتعديل حضور الموظفين وربط تسجيلات المواقع بالحضور تلقائيًا.</p></div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button class="primary-btn" onclick="openAttendanceModal()">+ تسجيل حضور</button>
+          <button class="primary-btn" onclick="loadAllData()">تحديث التحضير</button>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="metric"><div><h2 id="pagePresent">0</h2><p>حاضر</p></div><div class="icon green">✓</div></div></div>
+        <div class="card"><div class="metric"><div><h2 id="pageLate">0</h2><p>متأخر</p></div><div class="icon amber">◷</div></div></div>
+        <div class="card"><div class="metric"><div><h2 id="pageMissing">0</h2><p>لم يسجل</p></div><div class="icon red">♙</div></div></div>
+      </div>
+      <div class="panel">
+        <h3>سجل التحضير</h3>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>الموظف</th><th>الرقم الوظيفي</th><th>وقت التسجيل</th><th>المصدر</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+          <tbody id="attendanceBody"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <section id="page-employees" class="page panel" style="display:none">
@@ -325,20 +353,7 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
 
     <section id="page-locations" class="page panel" style="display:none">
       <div class="page-head"><div><h2>المواقع</h2><p>عرض مواقع الموظفين وإضافة موقع يدويًا عند الحاجة.</p></div><div style="display:flex;gap:9px;flex-wrap:wrap"><button class="primary-btn" onclick="openLocationModal()">+ إضافة موقع</button><button class="primary-btn" onclick="loadAllData()">تحديث المواقع</button></div></div>
-      <div class="grid"><section class="panel"><h3>خريطة المواقع</h3><div class="map city-map" id="locationsMap">
-  <div class="map-grid"></div>
-  <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div>
-  <div class="building b1"><i></i><i></i><i></i><i></i></div>
-  <div class="building b2"><i></i><i></i><i></i></div>
-  <div class="building b3"><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="building b4"><i></i><i></i><i></i></div>
-  <div class="map-label l1">مقر الإدارة</div>
-  <div class="map-label l2">موقع ميداني</div>
-  <div class="map-pin mp1"><span>⌖</span></div>
-  <div class="map-pin mp2"><span>⌖</span></div>
-  <div class="map-pin mp3"><span>⌖</span></div>
-  <div class="map-status"><span class="live-dot"></span> مواقع الموظفين</div>
-</div></section><section class="panel"><h3>آخر التسجيلات</h3><div class="location-list" id="locationsList"></div></section></div>
+      <div class="grid"><section class="panel"><h3>خريطة المواقع</h3><div class="leaflet-map" id="locationsMap"></div><div class="muted" style="margin-top:9px">تظهر هنا المواقع الفعلية المحفوظة من روابط خرائط Google أو الإحداثيات.</div></section><section class="panel"><h3>آخر التسجيلات</h3><div class="location-list" id="locationsList"></div></section></div>
     </section>
 
     <section id="page-reports" class="page panel" style="display:none">
@@ -372,7 +387,7 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
       </div></div>
     </section>
   </div>
-  <div class="footer-note">نظام سجل — البيانات الآن تُقرأ من قاعدة Supabase بعد تسجيل الدخول.</div>
+  <div class="footer-note">نظام سجل — الحضور والمواقع والموظفون تُدار مباشرة من قاعدة Supabase بعد تسجيل الدخول.</div>
 </section>
 </main>
 </div>
@@ -387,15 +402,44 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
       <div class="field"><label>رقم الجوال</label><input id="empPhone" placeholder="9665xxxxxxxx"></div>
       <div class="field"><label>المسمى الوظيفي</label><input id="empJob" placeholder="موظف ميداني"></div>
       <div class="field"><label>القسم</label><select id="empDept"></select></div>
+      <div class="field" style="display:flex;align-items:center;gap:10px;padding-top:24px">
+        <input id="empActive" type="checkbox" checked style="width:18px;height:18px">
+        <label for="empActive" style="margin:0">الموظف نشط ويمكن تسجيل حضوره</label>
+      </div>
     </div>
     <button id="saveEmployeeBtn" class="primary-btn" style="width:100%;margin-top:18px">حفظ الموظف</button>
+  </div>
+</div>
+
+<div id="attendanceModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head"><h3 id="attendanceModalTitle">تسجيل حضور</h3><button class="close" onclick="closeAttendanceModal()">×</button></div>
+    <input type="hidden" id="attendanceId">
+    <div class="form-grid">
+      <div class="field"><label>الموظف</label><select id="attendanceEmployee"></select></div>
+      <div class="field"><label>الحالة</label>
+        <select id="attendanceStatus">
+          <option value="present">حاضر</option>
+          <option value="late">متأخر</option>
+        </select>
+      </div>
+      <div class="field"><label>وقت التسجيل</label><input id="attendanceTime" type="datetime-local"></div>
+      <div class="field"><label>المصدر</label>
+        <select id="attendanceSource">
+          <option value="manual">يدوي</option>
+          <option value="whatsapp">واتساب</option>
+          <option value="system">النظام</option>
+        </select>
+      </div>
+    </div>
+    <button id="saveAttendanceBtn" class="primary-btn" style="width:100%;margin-top:18px">حفظ الحضور</button>
   </div>
 </div>
 
 <div id="locationModal" class="modal-backdrop">
   <div class="modal">
     <div class="modal-head"><h3>إضافة موقع يدوي</h3><button class="close" onclick="closeLocationModal()">×</button></div>
-    <p style="margin:0 0 16px;color:#718198;font-size:13px;line-height:1.8">اختر الموظف ثم أدخل الإحداثيات. يمكنك أيضًا لصق رابط موقع من خرائط Google وسيحاول النظام استخراج الإحداثيات منه.</p>
+    <p style="margin:0 0 16px;color:#718198;font-size:13px;line-height:1.8">اختر الموظف ثم أدخل الإحداثيات. عند حفظ الموقع سيُسجَّل حضور الموظف لهذا اليوم تلقائيًا، ويُربط الموقع بسجل التحضير. يمكنك أيضًا لصق رابط موقع من خرائط Google وسيحاول النظام استخراج الإحداثيات منه.</p>
     <div class="form-grid">
       <div class="field"><label>الموظف</label><select id="locEmployee"></select></div>
       <div class="field"><label>مصدر الموقع</label><select id="locSource"><option value="manual">إدخال يدوي</option><option value="whatsapp">واتساب</option><option value="system">النظام</option></select></div>
@@ -403,6 +447,7 @@ body{background:radial-gradient(circle at 75% 0,#eaf4ff 0,transparent 28%),#f4f7
       <div class="field"><label>خط العرض Latitude</label><input id="locLat" inputmode="decimal" placeholder="21.543333"></div>
       <div class="field"><label>خط الطول Longitude</label><input id="locLng" inputmode="decimal" placeholder="39.172778"></div>
     </div>
+    <div id="locationPreviewMap" class="map-preview"></div>
     <button id="saveLocationBtn" class="primary-btn" style="width:100%;margin-top:18px">حفظ الموقع</button>
   </div>
 </div>
@@ -462,7 +507,7 @@ async function loadAllData(){
     const [e,a,l,d] = await Promise.all([
       db.from('employees').select('id,employee_number,full_name,phone_number,job_title,is_active,department_id,departments(name)').order('full_name'),
       db.from('attendance').select('id,employee_id,attendance_date,check_in_time,status,source,employees(full_name,employee_number)').eq('attendance_date',todayISO()).order('check_in_time',{ascending:false}),
-      db.from('locations').select('id,employee_id,latitude,longitude,sent_at,source,employees(full_name)').order('sent_at',{ascending:false}).limit(30),
+      db.from('locations').select('id,employee_id,attendance_id,latitude,longitude,sent_at,source,employees(full_name,employee_number)').order('sent_at',{ascending:false}).limit(30),
       db.from('departments').select('id,name').order('name')
     ]);
     for(const r of [e,a,l,d]) if(r.error) throw r.error;
@@ -504,82 +549,299 @@ function renderAll(){
 }
 function renderAttendance(id, rows, detailed){
   const body=document.getElementById(id);
-  if(!rows.length){body.innerHTML=`<tr><td colspan="${detailed?5:4}" style="text-align:center;color:#8290a2;padding:25px">لا توجد تسجيلات اليوم</td></tr>`;return}
+  if(!rows.length){
+    body.innerHTML=`<tr><td colspan="${detailed?6:4}" style="text-align:center;color:#8290a2;padding:25px">لا توجد تسجيلات اليوم</td></tr>`;
+    return;
+  }
   body.innerHTML=rows.map(r=>{
     const name=r.employees?.full_name||'موظف غير معروف';
     const num=r.employees?.employee_number||'—';
-    const status=r.status==='late'?'<span class="status s-late">متأخر</span>':'<span class="status s-present">حاضر</span>';
-    if(detailed)return `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(num)}</td><td>${fmtTime(r.check_in_time)}</td><td>${escapeHtml(r.source||'—')}</td><td>${status}</td></tr>`;
-    return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml(name[0]||'م')}</div>${escapeHtml(name)}</div></td><td>${fmtTime(r.check_in_time)}</td><td>📍 ${r.source==='whatsapp'?'واتساب':'النظام'}</td><td>${status}</td></tr>`;
+    const status=r.status==='late'
+      ? '<span class="status s-late">متأخر</span>'
+      : '<span class="status s-present">حاضر</span>';
+    if(detailed){
+      return `<tr>
+        <td>${escapeHtml(name)}</td>
+        <td>${escapeHtml(num)}</td>
+        <td>${fmtTime(r.check_in_time)}</td>
+        <td>${escapeHtml(r.source==='manual'?'يدوي':r.source==='whatsapp'?'واتساب':'النظام')}</td>
+        <td>${status}</td>
+        <td><div class="actions-cell">
+          <button class="action-btn action-edit" onclick="editAttendance('${r.id}')">تعديل</button>
+          <button class="action-btn action-delete" onclick="deleteAttendance('${r.id}')">حذف</button>
+        </div></td>
+      </tr>`;
+    }
+    return `<tr>
+      <td><div class="employee"><div class="mini-avatar">${escapeHtml(name[0]||'م')}</div>${escapeHtml(name)}</div></td>
+      <td>${fmtTime(r.check_in_time)}</td>
+      <td>📍 ${r.source==='whatsapp'?'واتساب':r.source==='manual'?'يدوي':'النظام'}</td>
+      <td>${status}</td>
+    </tr>`;
   }).join('');
+}
+function normalizeSearch(v){
+  return String(v||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).toLowerCase().trim();
 }
 function renderEmployees(){
   const body=document.getElementById('employeesBody');
-  if(!employees.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#8290a2;padding:25px">لا يوجد موظفون بعد — اضغط إضافة موظف</td></tr>';return}
-  body.innerHTML=employees.map(e=>{
+  const q=normalizeSearch(document.getElementById('searchInput')?.value||'');
+  const rows=employees.filter(e=>{
+    if(!q)return true;
+    return [e.full_name,e.employee_number,e.phone_number,e.job_title].some(v=>normalizeSearch(v).includes(q));
+  });
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#8290a2;padding:25px">'+(employees.length?'لا توجد نتائج مطابقة':'لا يوجد موظفون بعد — اضغط إضافة موظف')+'</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(e=>{
     const dept=e.departments?.name||'—';
     return `<tr><td><div class="employee"><div class="mini-avatar">${escapeHtml((e.full_name||'م')[0])}</div>${escapeHtml(e.full_name)}</div></td><td>${escapeHtml(e.employee_number)}</td><td>${escapeHtml(e.phone_number)}</td><td>${escapeHtml(dept)}</td><td><span class="status ${e.is_active?'s-present':'s-missing'}">${e.is_active?'نشط':'غير نشط'}</span></td><td><div class="actions-cell"><button class="action-btn action-edit" onclick="editEmployee('${e.id}')">تعديل</button><button class="action-btn action-delete" onclick="deleteEmployee('${e.id}')">حذف</button></div></td></tr>`;
   }).join('');
 }
 function renderLocations(){
-  const html=locations.slice(0,8).map(l=>`<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>${escapeHtml(l.employees?.full_name||'موظف')}</b><div class="muted">${fmtTime(l.sent_at)} — ${Number(l.latitude).toFixed(5)}, ${Number(l.longitude).toFixed(5)}</div></div></div><span>›</span></div>`).join('');
-  document.getElementById('latestLocations').innerHTML=html||'<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>لا توجد مواقع بعد</b><div class="muted">ستظهر هنا مواقع الموظفين عند وصولها.</div></div></div></div>';
-  document.getElementById('locationsList').innerHTML=html||'<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>لا توجد مواقع بعد</b><div class="muted">بانتظار أول تسجيل موقع.</div></div></div></div>';
-  ['dashboardMap','locationsMap'].forEach(id=>{
-    const map=document.getElementById(id);
-    map.querySelectorAll('.dynamic-pin').forEach(p=>p.remove());
-    locations.slice(0,10).forEach((l,i)=>{
-      const p=document.createElement('div');
-      p.className='map-pin dynamic-pin '+['mp1','mp2','mp3'][i%3];
-      p.title=`${l.employees?.full_name||'موظف'} — ${l.latitude}, ${l.longitude}`;
-      p.innerHTML='<span>⌖</span>';
-      map.appendChild(p);
-    });
-    const badge=map.querySelector('.map-status');
-    if(badge) badge.innerHTML='<span class="live-dot"></span> '+locations.length+' موقع اليوم';
-  });
+  const html=locations.slice(0,8).map(l=>{
+    const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(l.latitude)},${encodeURIComponent(l.longitude)}`;
+    return `<div class="loc">
+      <div class="loc-left">
+        <div class="loc-icon">⌖</div>
+        <div>
+          <b>${escapeHtml(l.employees?.full_name||'موظف')}</b>
+          <div class="muted">${fmtTime(l.sent_at)} — ${Number(l.latitude).toFixed(5)}, ${Number(l.longitude).toFixed(5)}</div>
+          <div class="muted">${l.attendance_id?'مرتبط بالتحضير اليومي':'موقع مستقل'}</div>
+        </div>
+      </div>
+      <a class="action-btn action-link" href="${mapUrl}" target="_blank" rel="noopener">فتح الخريطة</a>
+    </div>`;
+  }).join('');
+  const empty='<div class="loc"><div class="loc-left"><div class="loc-icon">⌖</div><div><b>لا توجد مواقع بعد</b><div class="muted">أضف رابط Google Maps أو إحداثيات وسيظهر الموقع هنا.</div></div></div></div>';
+  document.getElementById('latestLocations').innerHTML=html||empty;
+  document.getElementById('locationsList').innerHTML=html||empty;
+  updateLeafletMaps();
 }
+
+let locationMap=null;
+let dashboardMap=null;
+let previewMap=null;
+let locationMarkers=[];
+let dashboardMarkers=[];
+let previewMarker=null;
+
+function createLeafletMap(elementId, center=[21.5433,39.1728], zoom=12){
+  const el=document.getElementById(elementId);
+  if(!el || !window.L) return null;
+  const map=L.map(el,{scrollWheelZoom:true}).setView(center,zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,
+    attribution:'© OpenStreetMap contributors'
+  }).addTo(map);
+  return map;
+}
+function clearMarkers(arr){ arr.forEach(m=>m.remove()); arr.length=0; }
+function addLocationMarkers(map, arr, items){
+  if(!map) return;
+  clearMarkers(arr);
+  const bounds=[];
+  items.forEach(l=>{
+    const lat=Number(l.latitude), lng=Number(l.longitude);
+    if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
+    const name=l.employees?.full_name||'موظف';
+    const marker=L.marker([lat,lng]).addTo(map);
+    marker.bindPopup(`<b>${escapeHtml(name)}</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener">فتح في Google Maps</a>`);
+    arr.push(marker); bounds.push([lat,lng]);
+  });
+  if(bounds.length===1) map.setView(bounds[0],16);
+  if(bounds.length>1) map.fitBounds(bounds,{padding:[35,35],maxZoom:16});
+}
+function updateLeafletMaps(){
+  if(!window.L) return;
+  if(!locationMap) locationMap=createLeafletMap('locationsMap');
+  if(!dashboardMap) dashboardMap=createLeafletMap('dashboardMap');
+  addLocationMarkers(locationMap,locationMarkers,locations);
+  addLocationMarkers(dashboardMap,dashboardMarkers,locations);
+  setTimeout(()=>{ locationMap?.invalidateSize(); dashboardMap?.invalidateSize(); },150);
+}
+function showPreviewMap(lat,lng){
+  const box=document.getElementById('locationPreviewMap');
+  if(!box || !window.L || !Number.isFinite(lat)||!Number.isFinite(lng)) return;
+  box.classList.add('show');
+  if(!previewMap){
+    previewMap=createLeafletMap('locationPreviewMap',[lat,lng],17);
+  }else{
+    previewMap.setView([lat,lng],17);
+    if(previewMarker) previewMarker.remove();
+  }
+  previewMarker=L.marker([lat,lng]).addTo(previewMap);
+  previewMarker.bindPopup('<b>الموقع المحدد</b>').openPopup();
+  setTimeout(()=>previewMap.invalidateSize(),100);
+}
+
 function renderChart(id){
   const labels=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس'];
   document.getElementById(id).innerHTML=labels.map((day,i)=>`<div class="bar-col"><div class="bars"><i class="bar" style="height:${55+i*7}%"></i><i class="bar late" style="height:${8+(i%3)*3}%"></i></div><small>${day}</small></div>`).join('');
 }
 function openLocationModal(){
   const select=document.getElementById('locEmployee');
-  select.innerHTML=employees.map(e=>`<option value="${e.id}">${escapeHtml(e.full_name)} — ${escapeHtml(e.employee_number)}</option>`).join('');
+  const activeEmployees=employees.filter(e=>e.is_active!==false);
+  select.innerHTML=activeEmployees.map(e=>`<option value="${e.id}">${escapeHtml(e.full_name)} — ${escapeHtml(e.employee_number)}</option>`).join('');
   document.getElementById('locMapUrl').value='';
   document.getElementById('locLat').value='';
   document.getElementById('locLng').value='';
+  document.getElementById('locationPreviewMap').classList.remove('show');
+  if(previewMarker){previewMarker.remove(); previewMarker=null;}
   document.getElementById('locSource').value='manual';
   document.getElementById('locationModal').style.display='flex';
 }
 function closeLocationModal(){document.getElementById('locationModal').style.display='none'}
 function extractCoordinates(value){
   if(!value) return null;
-  const s=String(value).replace(/\s+/g,' ');
+  const s=String(value).trim().replace(/\s+/g,' ');
   let m=s.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
   if(m) return {lat:m[1],lng:m[2]};
+  m=s.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i);
+  if(m) return {lat:m[1],lng:m[2]};
   m=s.match(/[?&](?:q|query|ll|center)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/i);
+  if(m) return {lat:m[1],lng:m[2]};
+  m=s.match(/(?:^|[?&])q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/i);
   if(m) return {lat:m[1],lng:m[2]};
   m=s.match(/(-?\d{1,3}\.\d+)\s*[,،]\s*(-?\d{1,3}\.\d+)/);
   if(m) return {lat:m[1],lng:m[2]};
   return null;
 }
+function updateLocationPreview(){
+  const lat=Number(document.getElementById('locLat').value.replace('،','.').trim());
+  const lng=Number(document.getElementById('locLng').value.replace('،','.').trim());
+  if(Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180) showPreviewMap(lat,lng);
+}
 document.getElementById('locMapUrl').addEventListener('input',e=>{
   const c=extractCoordinates(e.target.value.trim());
-  if(c){document.getElementById('locLat').value=c.lat;document.getElementById('locLng').value=c.lng}
+  if(c){
+    document.getElementById('locLat').value=c.lat;
+    document.getElementById('locLng').value=c.lng;
+    showPreviewMap(Number(c.lat),Number(c.lng));
+  }
 });
+document.getElementById('locLat').addEventListener('input',updateLocationPreview);
+document.getElementById('locLng').addEventListener('input',updateLocationPreview);
 document.getElementById('saveLocationBtn').addEventListener('click',async()=>{
   const employee_id=document.getElementById('locEmployee').value;
   const source=document.getElementById('locSource').value;
   const lat=Number(document.getElementById('locLat').value.replace('،','.').trim());
   const lng=Number(document.getElementById('locLng').value.replace('،','.').trim());
-  if(!employee_id){showToast('أضف موظفًا أولًا');return}
-  if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat > 90||lng < -180||lng > 180){showToast('أدخل إحداثيات صحيحة للموقع');return}
-  const btn=document.getElementById('saveLocationBtn');btn.disabled=true;btn.textContent='جاري حفظ الموقع...';
-  const {error}=await db.from('locations').insert({employee_id,latitude:lat,longitude:lng,source,sent_at:new Date().toISOString()});
-  btn.disabled=false;btn.textContent='حفظ الموقع';
-  if(error){showToast('تعذر حفظ الموقع: '+error.message);return}
-  closeLocationModal();showToast('تمت إضافة الموقع بنجاح');await loadAllData();
+  if(!employee_id){showToast('أضف موظفًا نشطًا أولًا');return}
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat > 90||lng < -180||lng > 180){
+    showToast('أدخل إحداثيات صحيحة للموقع');return
+  }
+
+  const btn=document.getElementById('saveLocationBtn');
+  btn.disabled=true;btn.textContent='جاري حفظ الموقع والحضور...';
+  try{
+    // 1) إنشاء حضور اليوم أو إعادة استخدام الحضور الموجود للموظف.
+    const attendancePayload={
+      employee_id,
+      attendance_date:todayISO(),
+      check_in_time:new Date().toISOString(),
+      status:'present',
+      source
+    };
+    const {data:attData,error:attError}=await db.from('attendance')
+      .upsert(attendancePayload,{onConflict:'employee_id,attendance_date'})
+      .select('id')
+      .single();
+    if(attError) throw attError;
+
+    // 2) ربط الموقع بالحضور الذي تم إنشاؤه/الموجود.
+    const {error:locError}=await db.from('locations').insert({
+      employee_id,
+      attendance_id:attData.id,
+      latitude:lat,
+      longitude:lng,
+      source,
+      sent_at:new Date().toISOString()
+    });
+    if(locError) throw locError;
+
+    closeLocationModal();
+    showToast('تم حفظ الموقع وتسجيل الحضور اليومي بنجاح');
+    await loadAllData();
+  }catch(error){
+    console.error(error);
+    showToast('تعذر حفظ الموقع والحضور: '+(error.message||'خطأ غير معروف'));
+  }finally{
+    btn.disabled=false;btn.textContent='حفظ الموقع';
+  }
+});
+
+function localDateTimeValue(iso){
+  const d=new Date(iso||Date.now());
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function openAttendanceModal(row=null){
+  const select=document.getElementById('attendanceEmployee');
+  const activeEmployees=employees.filter(e=>e.is_active!==false);
+  select.innerHTML=activeEmployees.map(e=>`<option value="${e.id}">${escapeHtml(e.full_name)} — ${escapeHtml(e.employee_number)}</option>`).join('');
+  document.getElementById('attendanceId').value=row?.id||'';
+  document.getElementById('attendanceStatus').value=row?.status||'present';
+  document.getElementById('attendanceSource').value=row?.source||'manual';
+  document.getElementById('attendanceTime').value=localDateTimeValue(row?.check_in_time);
+  if(row) select.value=row.employee_id;
+  document.getElementById('attendanceModalTitle').textContent=row?'تعديل الحضور':'تسجيل حضور';
+  document.getElementById('saveAttendanceBtn').textContent=row?'حفظ التعديل':'حفظ الحضور';
+  document.getElementById('attendanceModal').style.display='flex';
+}
+function closeAttendanceModal(){document.getElementById('attendanceModal').style.display='none'}
+function editAttendance(id){
+  const row=attendance.find(x=>x.id===id);
+  if(row) openAttendanceModal(row);
+}
+async function deleteAttendance(id){
+  const row=attendance.find(x=>x.id===id);
+  if(!row)return;
+  const ok=confirm(`هل أنت متأكد من حذف حضور «${row.employees?.full_name||'الموظف'}» لهذا اليوم؟`);
+  if(!ok)return;
+  const {error}=await db.from('attendance').delete().eq('id',id);
+  if(error){showToast('تعذر حذف الحضور: '+error.message);return}
+  showToast('تم حذف تسجيل الحضور');
+  await loadAllData();
+}
+document.getElementById('saveAttendanceBtn').addEventListener('click',async()=>{
+  const id=document.getElementById('attendanceId').value.trim();
+  const employee_id=document.getElementById('attendanceEmployee').value;
+  const status=document.getElementById('attendanceStatus').value;
+  const source=document.getElementById('attendanceSource').value;
+  const localValue=document.getElementById('attendanceTime').value;
+  if(!employee_id){showToast('اختر الموظف');return}
+  if(!localValue){showToast('حدد وقت التسجيل');return}
+  const check_in_time=new Date(localValue).toISOString();
+
+  const btn=document.getElementById('saveAttendanceBtn');
+  btn.disabled=true;btn.textContent=id?'جاري حفظ التعديل...':'جاري تسجيل الحضور...';
+  try{
+    let result;
+    if(id){
+      result=await db.from('attendance').update({
+        employee_id,status,source,check_in_time,attendance_date:todayISO()
+      }).eq('id',id);
+    }else{
+      result=await db.from('attendance').upsert({
+        employee_id,
+        attendance_date:todayISO(),
+        check_in_time,
+        status,
+        source
+      },{onConflict:'employee_id,attendance_date'});
+    }
+    if(result.error)throw result.error;
+    closeAttendanceModal();
+    showToast(id?'تم تعديل الحضور بنجاح':'تم تسجيل الحضور بنجاح');
+    await loadAllData();
+  }catch(error){
+    console.error(error);
+    showToast('تعذر حفظ الحضور: '+(error.message||'تحقق من الصلاحيات'));
+  }finally{
+    btn.disabled=false;btn.textContent=id?'حفظ التعديل':'حفظ الحضور';
+  }
 });
 
 function exportAttendanceCsv(){
@@ -603,6 +865,7 @@ function openEmployeeModal(employee=null){
   document.getElementById('empName').value=employee?.full_name||'';
   document.getElementById('empPhone').value=employee?.phone_number||'';
   document.getElementById('empJob').value=employee?.job_title||'';
+  document.getElementById('empActive').checked=employee?.is_active!==false;
   modal.style.display='flex';
   loadDepartments(employee?.department_id||'');
 }
@@ -636,6 +899,7 @@ document.getElementById('saveEmployeeBtn').addEventListener('click',async()=>{
     phone_number:document.getElementById('empPhone').value.trim(),
     job_title:document.getElementById('empJob').value.trim()||null,
     department_id:document.getElementById('empDept').value||null,
+    is_active:document.getElementById('empActive').checked,
     updated_at:new Date().toISOString()
   };
   if(!payload.employee_number||!payload.full_name||!payload.phone_number){showToast('عبّي الرقم الوظيفي والاسم ورقم الجوال');return}
@@ -648,9 +912,11 @@ document.getElementById('saveEmployeeBtn').addEventListener('click',async()=>{
   if(result.error){showToast('تعذر حفظ الموظف: '+result.error.message);return}
   closeEmployeeModal();
   ['empId','empNumber','empName','empPhone','empJob'].forEach(x=>document.getElementById(x).value='');
+document.getElementById('empActive').checked=true;
   showToast(id?'تم تعديل بيانات الموظف بنجاح':'تمت إضافة الموظف بنجاح');
   await loadAllData();
 });
+document.getElementById('searchInput').addEventListener('input',()=>renderEmployees());
 document.getElementById('refreshBtn').addEventListener('click',loadAllData);
 document.getElementById('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();showLogin()});
 document.getElementById('loginBtn').addEventListener('click',login);
@@ -716,6 +982,17 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 
 showLogin();
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    if(window.L){
+      locationMap=createLeafletMap('locationsMap');
+      dashboardMap=createLeafletMap('dashboardMap');
+      if(locationMap) locationMap.invalidateSize();
+      if(dashboardMap) dashboardMap.invalidateSize();
+    }
+  },300);
+});
 </script>
 </body>
 </html>
